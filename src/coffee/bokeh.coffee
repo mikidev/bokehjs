@@ -224,7 +224,7 @@ class LinearMapper extends Mapper
     scale = @get('scale')
     for data, idx in datav
       datav[idx] = scale(data)
-
+    return null
   map_data : (screen) ->
     return @get('scale').invert(screen)
 

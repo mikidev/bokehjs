@@ -200,7 +200,9 @@ class DeferredParent extends DeferredView
   render_loop : () ->
     @render_deferred_components()
     if not @removed and @use_render_loop
-      setTimeout((() => @render_loop()), 100)
+      delay = _.max([new Date() - @lastloop, 0])
+      setTimeout((() => @render_loop()), delay)
+      @lastloop = new Date()
     else
       @looping = false
 

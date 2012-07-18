@@ -422,21 +422,27 @@ class LineRendererView extends PlotWidget
     safebind(this, @mget_ref('data_source'), 'change:data', @request_render)
     super(options)
 
-  render_line : (node) ->
+  calc_buffer : (data) ->
     xmapper = @model.get_ref('xmapper')
     ymapper = @model.get_ref('ymapper')
     xfield = @model.get('xfield')
     yfield = @model.get('yfield')
+    datax = (x[xfield] for x in data)
+    xmapper.v_map_screen(datax)
+    @model.v_xpos(datax)
+    datay = (y[yfield] for y in data)
+    ymapper.v_map_screen(datay)
+    @model.v_ypos(datay)
+    @screenx = datax
+    @screeny = datay
+
+  render_line : (node) ->
     line = d3.svg.line()
       .x(
-        (d) =>
-          pos = xmapper.map_screen(d[xfield])
-          return @model.xpos(pos)
+        ((d, i) => return @screenx[i])
       )
       .y(
-        (d) =>
-          pos = ymapper.map_screen(d[yfield])
-          return @model.ypos(pos)
+        ((d, i) => return @screeny[i])
       )
     node.attr('stroke', @mget('color'))
       .attr('d', line)
@@ -445,6 +451,7 @@ class LineRendererView extends PlotWidget
 
   render : ->
     super()
+    @calc_buffer(@model.get_ref('data_source').get('data'))
     plot = @tag_d3('plotwindow', this.plot_id)
     node = @tag_d3('line')
     if not node
@@ -453,6 +460,7 @@ class LineRendererView extends PlotWidget
     @render_line(path)
     @render_line(path.enter().append('path'))
     return null
+
 window.scatter_render = 0
 class ScatterRendererView extends PlotWidget
   request_render : () ->
@@ -478,6 +486,8 @@ class ScatterRendererView extends PlotWidget
     else
       color = @model.get('foreground_color')
       marks.attr('fill', color)
+    color = @model.get('foreground_color')
+    marks.attr('fill', color)
     return null
 
   size_marks : (marks) ->
@@ -485,8 +495,10 @@ class ScatterRendererView extends PlotWidget
     return null
 
   position_marks : (marks) ->
-    marks.attr('cx', ((d, i) => return @screenx[i]))
-      .attr('cy', ((d, i) => return @screeny[i]))
+    screenx = @screenx
+    screeny = @screeny
+    marks.attr('cx', ((d, i) => return screenx[i]))
+      .attr('cy', ((d, i) => return screeny[i]))
     return null
 
   get_marks : () ->
@@ -496,7 +508,7 @@ class ScatterRendererView extends PlotWidget
       node = plot.append('g')
       .attr('id', @tag_id('scatter'))
     circles = node.selectAll(@model.get('mark'))
-      .data(@model.get_ref('data_source').get('data'))
+      .data(_.range(@model.get_ref('data_source').get('data').length))
 
   get_new_marks : (marks) ->
     return marks.enter().append(@model.get('mark'))
@@ -507,33 +519,67 @@ class ScatterRendererView extends PlotWidget
     xfield = @model.get('xfield')
     yfield = @model.get('yfield')
     datax = (x[xfield] for x in data)
-    screenx = xmapper.v_map_screen(datax)
-    screenx = @model.v_xpos(screenx)
+    xmapper.v_map_screen(datax)
+    @model.v_xpos(datax)
     datay = (y[yfield] for y in data)
-    screeny = ymapper.v_map_screen(datay)
-    screeny = @model.v_ypos(screeny)
-    @screenx = screenx
-    @screeny = screeny
+    ymapper.v_map_screen(datay)
+    @model.v_ypos(datay)
+    @screenx = datax
+    @screeny = datay
 
-  render : ->
+  render : =>
     a = new Date()
+    bigstart = a
     super()
-    circles = @get_marks()
+    a = new Date()
     @calc_buffer(@model.get_ref('data_source').get('data'))
+    b = new Date()
+    console.log('buffer', b-a)
+
+    #a = new Date()
+    circles = @get_marks()
+    #b = new Date()
+    #console.log('circle', b-a)
+
+    #a = new Date()
     @position_marks(circles)
+    #b = new Date()
+    #console.log('position', b-a)
+
+    #a = new Date()
     @size_marks(circles)
+    #b = new Date()
+    #console.log('size', b-a)
+
+    #a = new Date()
     @fill_marks(circles)
+    #b = new Date()
+    #console.log('fill', b-a)
+
+    #a = new Date()
     newcircles = @get_new_marks(circles)
+    #b = new Date()
+    #console.log('newmarks', b-a)
+
+    #a = new Date()
     @position_marks(newcircles)
+    #b = new Date()
+    #console.log('position', b-a)
+
+    #a = new Date()
     @size_marks(newcircles)
+    #b = new Date()
+    #console.log('size', b-a)
+
+    #a = new Date()
     @fill_marks(newcircles)
+    #b = new Date()
+    #console.log('fill', b-a)
+
     circles.exit().remove();
     b = new Date()
-    console.log(b-a)
-    return null
+    console.log(b - bigstart)
 
-
-#  tools
 
 class PanToolView extends PlotWidget
   initialize : (options) ->
@@ -747,3 +793,44 @@ class SelectionToolView extends PlotWidget
     super()
     @_render_shading()
     return null
+
+runit = () ->
+  renderers = _.values(_.values($CDX.main_tab_set.tab_view_dict)[0].view.renderers)
+  linerenderers = _.filter(renderers, ((x) -> x.model.type == 'LineRenderer'))
+  scatterrenderers = _.filter(renderers, ((x) -> x.model.type == 'ScatterRenderer'))
+  val = 0
+  a = new Date()
+  for c in _.range(100)
+    for lr in linerenderers
+      lr.render()
+  b = new Date()
+  val += b-a
+  console.log(val / 100)
+  $('body').append(val / 100)
+  a = new Date()
+  for c in _.range(100)
+    for lr in scatterrenderers
+      lr.render()
+  b = new Date()
+  val += b-a
+  console.log(val / 100)
+  $('body').append(val / 100)
+
+# _.delay(
+#   , 1000
+# )
+
+# runit = () ->
+#     renderer = _.values(_.values($CDX.main_tab_set.tab_view_dict)[0].view.renderers)[0]
+#     val = 0
+#     a = new Date()
+#     for c in _.range(100)
+#       renderer.render()
+#     b = new Date()
+#     val += b-a
+#     console.log(val / 100)
+#     $('body').append(val / 100)
+
+_.delay(runit
+  , 1000
+)

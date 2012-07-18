@@ -29,7 +29,7 @@ test('linetest',  () ->
   b = new Date()
   console.log(b - a)
 )
-test('scatter',  () ->
+test('matter',  () ->
   expect(0)
   maxval = 1560
   x = _.range(maxval)
@@ -39,19 +39,41 @@ test('scatter',  () ->
   scale1 = d3.scale.linear().domain([0, maxval]).range([0, 300])
   scale2 = d3.scale.linear().domain([0, maxval]).range([300, 0])
   $('body').append("<div><svg id='chart'></svg></div>")
-  d3.select('#chart').attr('width', 300).attr('height', 300)
-  a = new Date()
-  node = d3.select('#chart').selectAll('circle').data(data)
-          .enter().append('circle')
-  b = new Date()
-  console.log('getmarks', b - a)
-  a = new Date()
-  for c in _.range(1)
-    console.log('drawing scatter')
-    node .attr('cx', ((d) -> scale1(d['x'])))
-      .attr('cy', ((d) -> scale2(d['x'])))
-      .attr('r', 5)
-      .attr('fill', '#000')
-  b = new Date()
-  console.log(b - a)
+  calc_buffer = () ->
+    datax = (x['x'] for x in data)
+    datay = (x['y'] for x in data)
+    for dat, idx in datax
+      datax[idx] = scale1(dat)
+    for dat, idx in datay
+      datay[idx] = scale2(dat)
+    window.screenx=datax
+    window.screeny=datay
+
+  window.render = () ->
+    a = new Date()
+    calc_buffer()
+    datax = (x['x'] for x in data)
+    datay = (x['y'] for x in data)
+    d3.select('#chart').attr('width', 300).attr('height', 300)
+    node = d3.select('#chart').selectAll('circle').data(data)
+    node .attr('cx', ((d, i) -> window.screenx[i]))
+        .attr('cy', ((d, i) -> window.screeny[i]))
+        .attr('r', 5)
+        .attr('fill', '#000')
+    node = node.enter().append('circle')
+    node .attr('cx', ((d, i) -> window.screenx[i]))
+        .attr('cy', ((d, i) -> window.screeny[i]))
+        .attr('r', 5)
+        .attr('fill', '#000')
+    b = new Date()
+    #console.log(b - a)
+    return b - a
+  window.render2=render
+  _.delay(()->
+      val = 0
+      for c in _.range(100)
+        val += window.render2()
+      console.log(val / 100)
+      $('body').append(val / 100)
+    , 1000)
 )
