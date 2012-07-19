@@ -1,6 +1,6 @@
-test('scatterslow',  () ->
+test('scatterfast',  () ->
   expect(0)
-  maxval = 1560
+  maxval = 1560 * 3
   x = _.range(maxval)
   y = _.range(maxval)
   data = ({'x' : temp[0], 'y' : temp[1]} for temp in _.zip(x, y))
@@ -8,8 +8,6 @@ test('scatterslow',  () ->
   $('body').append("<div><svg id='chart'></svg></div>")
   starter = d3.select('#chart').attr('width', 800).attr('height', 300)
   node1 = starter.append('g')
-  node2 = starter.append('g')
-  node3 = starter.append('g')
   render = (x1, x2, y1, y2) ->
     scale1 = d3.scale.linear().domain([0, maxval]).range([x1, x2])
     scale2 = d3.scale.linear().domain([0, maxval]).range([y2, y1])
@@ -42,7 +40,7 @@ test('scatterslow',  () ->
     calc_buffer()
     b = new Date()
     #console.log('calc', b - a)
-    for node in [node1, node2, node3]
+    for node in [node1]
       a = new Date()
       marks = get_marks(node)
       b = new Date()
@@ -85,5 +83,4 @@ test('scatterslow',  () ->
       togglestate = true
     numcircles.html("numcircles" + $('circle').length)
   )
-
 )
