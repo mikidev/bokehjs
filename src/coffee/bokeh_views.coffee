@@ -527,7 +527,7 @@ class ScatterRendererView extends PlotWidget
 
 
 #class ScatterRendererCanvasView extends PlotWidget
-class ScatterRendererView extends PlotWidget  
+class ScatterRendererView extends PlotWidget
   tagName : 'foreignObject'
   request_render : () ->
     super()
@@ -539,21 +539,20 @@ class ScatterRendererView extends PlotWidget
     safebind(this, @mget_ref('ymapper'), 'change', @request_render)
     safebind(this, @mget_ref('data_source'), 'change', @request_render)
     console.log("creating the stage")
-    @canvas = $('<canvas></canvas>')
-    @canvas.attr('height', @mget('height'))
-    @canvas.attr('width', @mget('width'))
     @$el.attr('height', @mget('height'))
     @$el.attr('width', @mget('width'))
-    @$el.append(@canvas)
+    body = $("<body></body>")
+    body.attr('xmlns', "http://www.w3.org/1999/xhtml")
+    @$el.append(body)
     @stage = new Kinetic.Stage
-      container: @canvas[0]
+      container: body[0]
       width: @mget('height')
       height: @mget('width')
     @layer = new Kinetic.Layer()
     @stage.add(@layer)
 
   addPolygon: (x,y) ->
-    
+
     @layer.add(new Kinetic.RegularPolygon(
       fill: 'red'
       sides: 10
@@ -562,7 +561,7 @@ class ScatterRendererView extends PlotWidget
       radius: 3
       strokeWidth: 3))
     console.log("addPolygon called with ", x,y)
-   
+
 
   fill_marks : (marks) ->
     return null
@@ -604,7 +603,7 @@ class ScatterRendererView extends PlotWidget
     data = @model.get_ref('data_source').get('data')
     @calc_buffer(data)
 
-    
+
     _.each(@screenx, (val, i) =>
       @addPolygon(@screenx[i], @screeny[i])
     )
