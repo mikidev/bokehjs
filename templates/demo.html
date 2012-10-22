@@ -2,10 +2,16 @@
 {% block main %}
 
 
-<pre>
+<h2> vision </h2>
+<p> I want a ul of plots arranged horizontally, with thumbnails/pictures of the plots.  clicking on any plot will expand the info about the given plot. </p>
 
-test('test_simple_plot',  ->
-    expect(0)
+<ul class="preview_carousel">
+  <li>
+    <p>
+      this is the simplest possible plot .
+      notice the ObjectArrayDataSource...
+    </p>
+    <pre>
 
     data_source = Bokeh.Collections['ObjectArrayDataSource'].create({
     	data : [{x : 1, y : -2},
@@ -23,29 +29,9 @@ test('test_simple_plot',  ->
     	div.append(view.$el)
     	view.render()
     console.log('test_simple_plot')
-    _.defer(myrender))
+    _.defer(myrender)
+    </pre>
+    <div class='plot_holder' id="plot1"></div>
+  </li>
 
-</pre>
-<script>
-
-
-    data_source = Bokeh.Collections['ObjectArrayDataSource'].create({
-    	data : [{x : 1, y : -2},
-    		{x : 2, y : -3},
-    		{x : 3, y : -4},
-    		{x : 4, y : -5},
-    		{x : 5, y : -6}]
-      }, {'local' : true});
-    plotmodel = Bokeh.scatter_plot(null, data_source, 'x', 'y', null, 'circle');
-    window.plot = plotmodel;
-    div = $('<div/>');
-    $('#plot1').append(div);
-    myrender  =  function() {
-    	view = new Bokeh.PlotView({'model' : plotmodel, 'render_loop' : true});
-    	div.append(view.$el);
-    	view.render();};
-    console.log('test_simple_plot')
-    _.defer(myrender);
-</script>
-<div id="plot1"></div>
 {% endblock %}

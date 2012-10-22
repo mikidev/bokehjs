@@ -10,7 +10,7 @@
 	<!-- Vendor scripts 
     <script type=text/javascript src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 -->
-  <link type="text/css" rel="stylesheet" href="/bokehjs/static/lib/css/bokeh.css"/>
+  <link type="text/css" rel="stylesheet" href="/bokehjs/static/css/bokeh.css"/>
   <!-- Your project file goes here -->
   <script type="text/javascript" src="/bokehjs/static/vendor/d3/d3.v2.js"></script>
 
@@ -39,9 +39,36 @@
   <script type="text/javascript" src="/bokehjs/static/js/bokeh_model.js"></script>
   <script type="text/javascript" src="/bokehjs/static/js/custom.js"></script>
 
-  <script type="text/javascript" src="/bokehjs/static/lib/js/testutils.js"></script>
-  
+  <script type="text/javascript" src="/bokehjs/static/js/testutils.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/js/demo.js"></script>  
 
+
+<style> 
+
+  .all_can_wrapper {position:relative; }
+  .can_wrapper {position:absolute; }
+  .main_ can_wrapper {border:1px dotted green;}
+  .main_can {border:1px solid blue}
+  .x_can_wrapper { border:1px solid orange; }
+  .y_can_wrapper { border:1px solid purple; }
+  .y_can {}
+  ._shader {display:none; } 
+  .shading ._shader {display:block; border:1px dashed green; position: absolute; z-index:-10;}
+  
+  .gridplot_container {position: relative;}
+  .gridplot_container .gp_plotwrapper { position:absolute; } 
+
+  button.active { border:3px solid blue }
+  .table_wrap { border:1px solid red; }
+
+  .table_wrap table { margin:5px; border:1px solid orange;  heig ht:300px; display:block; overflow-y:scroll }
+/*
+  .table_outer thead { fon t-size:15px; display:block; heig ht: 100px; overflow:auto; outline:1px  solid green}
+
+  .table_outer tbody { font -size:10px; display:table; height: 200px; overflow-y:scroll; outline:1px  solid blue}
+  .table_outer table td { border-left:1px solid black; border-right:1px solid black; }
+*/
+</style>
 
 
   </head>
