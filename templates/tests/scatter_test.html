@@ -1,0 +1,41 @@
+{% extends "test_base.html" %}
+{% block test_scripts %}
+
+  
+  <script type="text/javascript" src="/bokehjs/static/test/unittest/js/plot_test_simple2.js"></script>  
+  <script type="text/javascript" src="/bokehjs/static/test/unittest/js/tools_test.js"></script>    
+  <script type="text/javascript" src="/bokehjs/static/test/unittest/js/plot_test_grid2.js"></script>
+
+  <script type="text/javascript" src="/bokehjs/static/test/unittest/js/plot_test_bar.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/test/unittest/js/scale_test.js"></script>  
+  <script type="text/javascript" src="/bokehjs/static/test/unittest/js/date_test.js"></script>    
+  <script type="text/javascript" src="/bokehjs/static/test/unittest/js/datatable_test2.js"></script>    
+
+<style> 
+
+  .all_can_wrapper {position:relative; }
+  .can_wrapper {position:absolute; }
+  .main_ can_wrapper {border:1px dotted green;}
+  .main_can {border:1px solid blue}
+  .x_can_wrapper { border:1px solid orange; }
+  .y_can_wrapper { border:1px solid purple; }
+  .y_can {}
+  ._shader {display:none; } 
+  .shading ._shader {display:block; border:1px dashed green; position: absolute; z-index:-10;}
+  
+  .gridplot_container {position: relative;}
+  .gridplot_container .gp_plotwrapper { position:absolute; } 
+
+  button.active { border:3px solid blue }
+  .table_wrap { border:1px solid red; }
+
+  .table_wrap table { margin:5px; border:1px solid orange;  heig ht:300px; display:block; overflow-y:scroll }
+/*
+  .table_outer thead { fon t-size:15px; display:block; heig ht: 100px; overflow:auto; outline:1px  solid green}
+
+  .table_outer tbody { font -size:10px; display:table; height: 200px; overflow-y:scroll; outline:1px  solid blue}
+  .table_outer table td { border-left:1px solid black; border-right:1px solid black; }
+*/
+</style>
+
+{% endblock %}

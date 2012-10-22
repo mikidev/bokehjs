@@ -20,6 +20,10 @@ app = Flask(__name__, #static_path='/bokehjs/static')
 def main():
     return render_template('demo.html')
 
+@app.route('/bokehjs/test/<template_name>')
+def test(template_name):
+    return render_template('tests/%s.html' % template_name)
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5007)

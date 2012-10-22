@@ -9,6 +9,10 @@ projects = {
         'input' : 'static/coffee',
         'output' : 'static/js'
         },
+    'bokehjstest':{
+        'input' : 'static/test/unittest/',
+        'output' : 'static/test/unittest/js'
+        },
     }
 
 def build(inputdir, outputdir):

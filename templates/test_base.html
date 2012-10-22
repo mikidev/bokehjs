@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QUnit Test Suite</title>
+  <link rel="stylesheet" href="/bokehjs/static/vendor/qunit/css/qunit.css" type="text/css" media="screen">
+  <script type="text/javascript" src="/bokehjs/static/vendor/qunit/js/qunit.js"></script>
+  <link type="text/css" rel="stylesheet" href="/bokehjs/static/vendor/jquery/css/themes/base/jquery-ui.min.css"/>
+  <link type="text/css" rel="stylesheet" href="/bokehjs/static/css/bokeh.css"/>
+  <!-- Your project file goes here -->
+
+  <script type="text/javascript" src="/bokehjs/static/vendor/d3/d3.v2.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/vendor/jquery/js/jquery-1.6.4.min.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/vendor/jquery/js/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/vendor/underscore/underscore.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/vendor/backbone/backbone.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/vendor/buckets/buckets.js"></script>
+
+  <script type="text/javascript" src="/bokehjs/static/js/base.js"></script>    
+  <script type="text/javascript" src="/bokehjs/static/js/view_base.js"></script>  
+  <script type="text/javascript" src="/bokehjs/static/js/model_base.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/js/ui_view.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/js/ui_model.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/js/bokeh_views.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/js/tools.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/js/ticks.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/js/bokeh_model.js"></script>
+  <script type="text/javascript" src="/bokehjs/static/js/testutils.js"></script>  
+  <script type="text/javascript" src="/bokehjs/static/js/custom.js"></script>    
+
+	    {% block test_scripts %}
+	    {% endblock %}
+</head>
+<body>
+  <h1 id="qunit-header">QUnit Test Suite</h1>
+  <h2 id="qunit-banner"></h2>
+  <div id="qunit-testrunner-toolbar"></div>
+  <h2 id="qunit-userAgent"></h2>
+  <ol id="qunit-tests"></ol>
+</body>
+</html>
