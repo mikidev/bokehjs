@@ -34,7 +34,7 @@ class PlotWidget extends Continuum.DeferredView
 class GridPlotContainerView extends Continuum.DeferredView
   tagName : 'div'
   className:"gridplot_container"
-  
+
   default_options : { scale:1.0}
   initialize : (options) ->
     super(_.defaults(options, @default_options))
@@ -62,7 +62,7 @@ class GridPlotContainerView extends Continuum.DeferredView
 
   render : ->
     super()
-    
+
     row_heights =  @model.layout_heights()
     col_widths =  @model.layout_widths()
     y_coords = [0]
@@ -118,7 +118,7 @@ class ActiveToolManager
     @eventSink.active = true
     @bind_events()
 
-  bind_events : () ->  
+  bind_events : () ->
     @eventSink.on("clear_active_tool", () =>
       @eventSink.trigger("#{@eventSink.active}:deactivated")
       @eventSink.active = true)
@@ -204,7 +204,7 @@ class PlotView extends Continuum.DeferredView
     @$el.append($("""
       <div class='button_bar'/>
       <div class='all_can_wrapper'>
-        
+
         <div class='main_can_wrapper can_wrapper'>
           <div class='_shader' />
           <canvas class='main_can'></canvas>
@@ -228,7 +228,7 @@ class PlotView extends Continuum.DeferredView
     @bind_tools()
     @bind_overlays()
     return this
-    
+
   render : () ->
     super()
     @$el.attr("width", @options.scale * @mget('outerwidth'))
@@ -265,12 +265,12 @@ class PlotView extends Continuum.DeferredView
     for own key, view of @renderers
       @$el.append(view.$el)
     @render_end()
-    
+
   render_deferred_components: (force) ->
     super(force)
     all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
     if _.any(all_views, (v) -> v._dirty)
-      @ctx.clearRect(0,0,  @mget('width'), @mget('height'))      
+      @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
       for v in all_views
         v._dirty = true
         v.render_deferred_components(true)
@@ -287,7 +287,6 @@ class XYRendererView extends PlotWidget
     safebind(this, @mget_ref('xmapper'), 'change', @request_render)
     safebind(this, @mget_ref('ymapper'), 'change', @request_render)
     safebind(this, @mget_ref('data_source'), 'change:data', @request_render)
-
     super(options)
 
   calc_buffer : (data) ->
@@ -397,8 +396,10 @@ class D3LinearAxisView extends PlotWidget
         can_ctx.fillText(
           current_tick.toString(), x, 20)
         last_tick_end = (x + text_width) + 10
+      @plot_view.ctx.beginPath()
       @plot_view.ctx.moveTo(xpos(current_tick), 0)
       @plot_view.ctx.lineTo(xpos(current_tick), @mget('height') * op_scale)
+      @plot_view.ctx.stroke()
       current_tick += interval
 
     can_ctx.stroke()
@@ -421,7 +422,7 @@ class D3LinearAxisView extends PlotWidget
     op_scale = @plot_view.options.scale
     ypos = (real_y) ->
       (op_scale * (HEIGHT - ((real_y - min_y)*y_scale)))
-      
+
     [first_tick, last_tick] = ticks.auto_bounds(
       data_range.get('start'), data_range.get('end'), interval)
 
@@ -436,8 +437,10 @@ class D3LinearAxisView extends PlotWidget
       if y < last_tick_end
         can_ctx.fillText(current_tick.toString(), 0, y)
         last_tick_end = (y + @DEFAULT_TEXT_HEIGHT) + 10
+      @plot_view.ctx.beginPath()
       @plot_view.ctx.moveTo(0, ypos(current_tick))
       @plot_view.ctx.lineTo(@mget('width') * op_scale, ypos(current_tick))
+      @plot_view.ctx.stroke()
       current_tick += interval
 
     can_ctx.stroke()
@@ -520,10 +523,10 @@ class BarRendererView extends XYRendererView
       value_pos = (x) =>
         vp =  (@mget('width') - x)
         return vp
-    
+
       for i in [0..heights.length]
         @plot_view.ctx.fillRect(0, left_points[i], value_pos(heights[i]), thickness)
-    
+
     @plot_view.ctx.stroke()
     return null
 
@@ -616,7 +619,7 @@ class TableView extends Continuum.DeferredView
     @bind_overlays()
     @$el.addClass('table_wrap')
     return this
-    
+
   render : () ->
     super()
     o_w = @mget('outerwidth')
@@ -634,7 +637,7 @@ class TableView extends Continuum.DeferredView
     for own key, view of @renderers
       @$el.append(view.$el)
     @render_end()
-    
+
   render_deferred_components: (force) ->
     super(force)
     all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
@@ -657,7 +660,7 @@ class TableRendererView extends XYRendererView
     yfield = @model.get('yfield')
     @dataX = (x[xfield] for x in data)
     @dataY = (y[yfield] for y in data)
-    
+
     #@screeny = new Float32Array(screeny)
     #@screenx = new Float32Array(screenx)
     #@screenx = screenx
@@ -704,14 +707,14 @@ class ScatterRendererView extends XYRendererView
         #skip data sources which are not selecting'
         @render_end()
         return null
-    
+
     data = @model.get_ref('data_source').get('data')
     a = new Date()
     @calc_buffer(data)
     @plot_view.ctx.beginPath()
-    if navigator.userAgent.indexOf("WebKit") != -1
-      @plot_view.ctx.scale(@options.scale, @options.scale)
-
+#     if navigator.userAgent.indexOf("WebKit") != -1
+#       @plot_view.ctx.scale(@options.scale, @options.scale)
+#
     @plot_view.ctx.fillStyle = @mget('foreground_color')
     @plot_view.ctx.strokeStyle = @mget('foreground_color')
     color_field = @mget('color_field')
@@ -732,9 +735,6 @@ class ScatterRendererView extends XYRendererView
         @addCircle(@screenx[idx], @screeny[idx])
     @plot_view.ctx.stroke()
     @render_end()
-    b = new Date()
-    render_time = b-a
-    $('#timer').html( "render time #{render_time}")
     return null
 
 class OverlayView extends PlotWidget
@@ -769,9 +769,12 @@ class ScatterSelectionOverlayView extends OverlayView
       sel_idxs = renderer.get_ref('data_source').get('selected')
       ds = renderer.get_ref('data_source')
       data = ds.get('data')
+      # hugo - i think we need to do this each time....
+      # or else panning does not work
+      rendererview.calc_buffer(data)
       fcolor = @mget('foreground_color')
       rvm = rendererview.model
-      
+
       fcolor = rvm.get('foreground_color')
       unselected_color = @mget('unselected_color')
       color_field = rvm.get('color_field')
@@ -782,11 +785,10 @@ class ScatterSelectionOverlayView extends OverlayView
       last_color_field = fcolor
       @plot_view.ctx.strokeStyle = fcolor
       @plot_view.ctx.fillStyle = fcolor
-      
+
       last_color_field = false
       ctx = @plotview.ctx
       for idx in [0..data.length]
-        
         if idx in sel_idxs
           if color_field
             comp_color = color_mapper.map_screen(idx)
@@ -795,7 +797,6 @@ class ScatterSelectionOverlayView extends OverlayView
           else
             ctx.strokeStyle = fcolor
             ctx.fillStyle = fcolor
-            
         else
           ctx.fillStyle = unselected_color
           ctx.strokeStyle = unselected_color

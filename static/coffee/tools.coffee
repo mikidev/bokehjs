@@ -7,8 +7,8 @@ else
 safebind = Continuum.safebind
 
 
-    
-class TwoPointEventGenerator 
+
+class TwoPointEventGenerator
 
   constructor : (options) ->
     @options = options
@@ -27,6 +27,9 @@ class TwoPointEventGenerator
         return
       if not @tool_active
         return
+      offset = $(e.currentTarget).offset()
+      e.bokehX = e.pageX - offset.left
+      e.bokehY = e.pageY - offset.top
       if not @basepoint_set
         @dragging = true
         @basepoint_set = true
@@ -39,20 +42,25 @@ class TwoPointEventGenerator
 
     $(document).bind('keydown', (e) =>
       if e[@options.keyName]
-        @_start_drag())
+        @_start_drag()
+    )
+
 
     $(document).bind('keyup', (e) =>
       if not e[@options.keyName]
-        @_stop_drag())
+        @_stop_drag()
+    )
 
     @plotview.main_can_wrapper.bind('mousedown', (e) =>
       if @button_activated
-        @_start_drag())
-
+        @_start_drag()
+        return false
+    )
     @plotview.main_can_wrapper.bind('mouseup', (e) =>
       if @button_activated
-        @_stop_drag())
-
+        @_stop_drag()
+        return false
+    )
     @pan_button = $("<button> #{@options.buttonText} </button>")
     @plotview.$el.find('.button_bar').append(@pan_button)
 
@@ -80,7 +88,7 @@ class TwoPointEventGenerator
       @dragging = true
       if not @button_activated
         @pan_button.addClass('active')
-        
+
   _stop_drag : ->
     @basepoint_set = false
     if @dragging
@@ -113,10 +121,8 @@ class ToolView extends Bokeh.PlotWidget
 
 
 class PanToolView extends ToolView
-
-    
   eventGeneratorClass : TwoPointEventGenerator
-  evgen_options : {keyName:"shiftKey", buttonText:"Pan Tool"}
+  evgen_options : {keyName:"shiftKey", buttonText:"Pan"}
   tool_events : {
     UpdatingMouseMove: "_drag",
     SetBasepoint : "_set_base_point"}
@@ -126,9 +132,8 @@ class PanToolView extends ToolView
     return [x_, y_]
 
   _set_base_point : (e) ->
-    [@x, @y] = @mouse_coords(e, e.layerX, e.layerY)
-    xmappers = (@model.resolve_ref(x) for x in @mget('xmappers'))
-    ymappers = (@model.resolve_ref(x) for x in @mget('ymappers'))
+    [@x, @y] = @mouse_coords(e, e.bokehX, e.bokehY)
+    return null
 
   _drag_mapper : (mapper, diff) ->
     screen_range = mapper.get_ref('screen_range')
@@ -142,7 +147,7 @@ class PanToolView extends ToolView
     }, {'local' : true})
 
   _drag : (e) ->
-    [x, y] = @mouse_coords(e, e.layerX, e.layerY)
+    [x, y] = @mouse_coords(e, e.bokehX, e.bokehY)
     xdiff = x - @x
     ydiff = y - @y
     [@x, @y] = [x, y]
@@ -170,9 +175,9 @@ class SelectionToolView extends ToolView
       safebind(this, renderer.get_ref('xmapper'), 'change', select_callback)
       safebind(this, renderer.get_ref('ymapper'), 'change', select_callback)
 
-    
+
   eventGeneratorClass : TwoPointEventGenerator
-  evgen_options : {keyName:"ctrlKey", buttonText:"Selection Tool"}
+  evgen_options : {keyName:"ctrlKey", buttonText:"Select"}
   tool_events : {
     UpdatingMouseMove: "_selecting",
     SetBasepoint : "_start_selecting",
@@ -200,14 +205,14 @@ class SelectionToolView extends ToolView
       @shading = null
 
   _start_selecting : (e) ->
-    [x, y] = @mouse_coords(e, e.layerX, e.layerY)
+    [x, y] = @mouse_coords(e, e.bokehX, e.bokehY)
     @mset({'start_x' : x, 'start_y' : y, 'current_x' : null, 'current_y' : null})
     for renderer in @mget('renderers')
       data_source = @model.resolve_ref(renderer).get_ref('data_source')
       data_source.set('selecting', true)
       data_source.save()
     @basepoint_set = true
-    
+
   _get_selection_range : ->
     xrange = [@mget('start_x'), @mget('current_x')]
     yrange = [@mget('start_y'), @mget('current_y')]
@@ -222,7 +227,7 @@ class SelectionToolView extends ToolView
     return [xrange, yrange]
 
   _selecting : (e, x_, y_) ->
-    [x, y] = @mouse_coords(e, e.layerX, e.layerY)
+    [x, y] = @mouse_coords(e, e.bokehX, e.bokehY)
     @mset({'current_x' : x, 'current_y' : y})
     return null
 
@@ -281,12 +286,17 @@ class ZoomToolView extends Bokeh.PlotWidget
   initialize : (options) ->
     super(options)
 
-
   bind_events : (plotview) ->
     @plotview = plotview
-    $(@plotview.main_can_wrapper).bind("mousewheel",
-      (e, delta, dX, dY) =>
-        @_zoom(e, delta, e.layerX, e.layerY))
+    $(@plotview.main_can_wrapper).bind("mousewheel", (e, delta, dX, dY) =>
+        # cut and paste.. should refactor zoomtool or something
+        offset = $(e.currentTarget).offset()
+        e.bokehX = e.pageX - offset.left
+        e.bokehY = e.pageY - offset.top
+        @_zoom(e, delta, e.bokehX, e.bokehY)
+        e.preventDefault()
+        e.stopPropagation()
+    )
 
   mouse_coords : (e, x, y) ->
     [x_, y_] = [@plot_model.rxpos(x), @plot_model.rypos(y)]
@@ -309,13 +319,13 @@ class ZoomToolView extends Bokeh.PlotWidget
     [x, y] = @mouse_coords(e, screenX, screenY)
     speed = @mget('speed')
     factor = - speed  * (delta * 50)
-    #debugger
     xmappers = (@model.resolve_ref(mapper) for mapper in @mget('xmappers'))
     ymappers = (@model.resolve_ref(mapper) for mapper in @mget('ymappers'))
     for xmap in xmappers
       @_zoom_mapper(xmap, x, factor)
     for ymap in ymappers
       @_zoom_mapper(ymap, y, factor)
+    return null
 
 Bokeh.SelectionToolView = SelectionToolView
 Bokeh.PanToolView = PanToolView
