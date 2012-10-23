@@ -100,8 +100,46 @@ test('line_plot_non_full_grid_test', ->
   container.set({'children' : [[plot1.ref(), plot2.ref()], [plot3.ref()]]})
 
   _.defer(->
-  	view = new Bokeh.GridPlotContainerView(
-      {'model' : container, 'render_loop' : true})
-  	div.append(view.$el)		
-  	view.render()
-  	plot3.set({'height' : 300})))
+    view = new Bokeh.GridPlotContainerView({'model' : container, 'render_loop' : true})
+    div.append(view.$el)		
+    view.render()
+    plot3.set({'height' : 300})))
+
+    
+test('line_plot_non_full_grid_test2', ->
+  expect(0)
+  data_source1 = Bokeh.Collections['ObjectArrayDataSource'].create({
+  	data : [{x : 1, y : -2},
+  		{x : 2, y : -3},
+  		{x : 3, y : -4},
+  		{x : 4, y : -5},
+  		{x : 5, y : -6}]
+      }, {'local' : true});
+  data_source2 = Bokeh.Collections['ObjectArrayDataSource'].create({
+  	data : [{x : 1, y : 2},
+  		{x : 2, y : 3},
+  		{x : 3, y : 1},
+  		{x : 4, y : 5},
+  		{x : 5, y : 6}]
+      }, {'local' : true});
+  div = $('<div style="border:1px solid black"></div>')
+  $('body').append(div)
+  $('body').append($('<br/>'))    
+
+
+
+  container2 = Bokeh.Collections['GridPlotContainer'].create(
+  	{'render_loop' : true},
+  	{'local' : true});
+
+  plot5 = Bokeh.scatter_plot(container2, data_source1, 'x', 'y', 'x', 'circle');
+  plot6 = Bokeh.scatter_plot(container2, data_source2, 'x', 'y', 'x', 'circle');
+  plot7 = Bokeh.scatter_plot(container2, data_source2, 'x', 'y', 'x', 'circle');
+  #plot4 = Bokeh.line_plot(container, data_source1, 'x', 'y');
+  container2.set({'children' : [[plot5.ref()], [plot6.ref(), plot7.ref()]]})
+
+  _.defer(->
+    view = new Bokeh.GridPlotContainerView({'model' : container2, 'render_loop' : true})
+    div.append(view.$el)		
+    view.render()
+    plot5.set({'height' : 300})))
