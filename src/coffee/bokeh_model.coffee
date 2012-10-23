@@ -478,7 +478,14 @@ class GridPlotContainer extends Component
   layout_widths : ->
     maxdim = (dim, row) => (_.max((@resolve_ref(x).get(dim) for x in row)))
     num_cols = @get('children')[0].length
-    columns = ((row[n] for row in @get('children')) for n in _.range(num_cols))
+
+    columns = []
+    for n in _.range(num_cols)
+      temp_col = []
+      for row in @get('children')
+        if row[n]?  #make sure this row actually has this place full
+          temp_col.push(row[n])
+      columns.push(temp_col)
     col_widths = (@maxdim('outerwidth', col) for col in columns)
     return col_widths
 
