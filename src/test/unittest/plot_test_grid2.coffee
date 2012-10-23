@@ -95,6 +95,8 @@ test('line_plot_non_full_grid_test', ->
 
   plot1 = Bokeh.scatter_plot(container, data_source1, 'x', 'y', 'x', 'circle');
   plot2 = Bokeh.scatter_plot(container, data_source2, 'x', 'y', 'x', 'circle');
+  plot1.set({'width' : 600})
+  plot2.set({'width' : 600})
   plot3 = Bokeh.scatter_plot(container, data_source2, 'x', 'y', 'x', 'circle');
   #plot4 = Bokeh.line_plot(container, data_source1, 'x', 'y');
   container.set({'children' : [[plot1.ref(), plot2.ref()], [plot3.ref()]]})
@@ -133,13 +135,14 @@ test('line_plot_non_full_grid_test2', ->
   	{'local' : true});
 
   plot5 = Bokeh.scatter_plot(container2, data_source1, 'x', 'y', 'x', 'circle');
+
   plot6 = Bokeh.scatter_plot(container2, data_source2, 'x', 'y', 'x', 'circle');
   plot7 = Bokeh.scatter_plot(container2, data_source2, 'x', 'y', 'x', 'circle');
+  plot7.set({'width' : 600})
   #plot4 = Bokeh.line_plot(container, data_source1, 'x', 'y');
   container2.set({'children' : [[plot5.ref()], [plot6.ref(), plot7.ref()]]})
 
   _.defer(->
     view = new Bokeh.GridPlotContainerView({'model' : container2, 'render_loop' : true})
     div.append(view.$el)		
-    view.render()
-    plot5.set({'height' : 300})))
+    view.render()))
