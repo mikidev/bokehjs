@@ -61,7 +61,7 @@ class TwoPointEventGenerator
         @_stop_drag()
         return false
     )
-    @pan_button = $("<button class='btn btn-small'> #{@options.buttonText} </button>")
+    @pan_button = $("<button class='btn btn-small #{@options.btn_extra_class}'> #{@options.buttonText} </button>")
     @plotview.$el.find('.button_bar').append(@pan_button)
 
     @pan_button.click(=>
@@ -120,9 +120,10 @@ class ToolView extends Bokeh.PlotWidget
       eventSink.on(full_event_name, wrap))
 
 
+
 class PanToolView extends ToolView
   eventGeneratorClass : TwoPointEventGenerator
-  evgen_options : {keyName:"shiftKey", buttonText:"Pan"}
+  evgen_options : {keyName:"shiftKey", buttonText:"Pan", btn_extra_class:"pan"}
   tool_events : {
     UpdatingMouseMove: "_drag",
     SetBasepoint : "_set_base_point"}
@@ -177,7 +178,7 @@ class SelectionToolView extends ToolView
 
 
   eventGeneratorClass : TwoPointEventGenerator
-  evgen_options : {keyName:"ctrlKey", buttonText:"Select"}
+  evgen_options : {keyName:"ctrlKey", buttonText:"Select", btn_extra_class:"select"}
   tool_events : {
     UpdatingMouseMove: "_selecting",
     SetBasepoint : "_start_selecting",
