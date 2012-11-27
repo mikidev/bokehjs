@@ -661,8 +661,10 @@ class LineRendererView extends XYRendererView
     data = @model.get_ref('data_source').get('data')
     @calc_buffer(data)
 
-    @plot_view.ctx.fillStyle = @mget('foreground-color')
-    @plot_view.ctx.strokeStyle = @mget('foreground-color')
+    fg = @mget('foreground-color')
+    if fg
+      @plot_view.ctx.fillStyle = fg
+      @plot_view.ctx.strokeStyle = fg
     @plot_view.ctx.beginPath()
 
     @plot_view.ctx.moveTo(@screenx[0], @screeny[0])
@@ -839,8 +841,10 @@ class ScatterRendererView extends XYRendererView
 #     if navigator.userAgent.indexOf("WebKit") != -1
 #       @plot_view.ctx.scale(@options.scale, @options.scale)
 #
-    @plot_view.ctx.fillStyle = @mget('foreground_color')
-    @plot_view.ctx.strokeStyle = @mget('foreground_color')
+    fg = @mget('foreground_color')
+    if fg
+      @plot_view.ctx.fillStyle = @mget('foreground_color')
+      @plot_view.ctx.strokeStyle = @mget('foreground_color')
     color_field = @mget('color_field')
     ctx = @plot_view.ctx
     m2pi = Math.PI*2
