@@ -111,6 +111,27 @@ class ContinuumView extends Backbone.View
     safebind(this, @model, 'change:outerheight', ()->
       @$el.dialog('option', 'height', @mget('outerheight')))
 
+
+
+delay_render = (callback) ->
+  #Future-proof: when feature is fully standardized
+  if (window.requestAnimationFrame)
+    return window.requestAnimationFrame(callback);
+  #IE implementation
+  else if (window.msRequestAnimationFrame)
+    return window.msRequestAnimationFrame(callback);
+  # Firefox implementation
+  else if (window.mozRequestAnimationFrame)
+    return window.mozRequestAnimationFrame(callback);
+  # Chrome implementation
+  else if (window.webkitRequestAnimationFrame)
+    return window.webkitRequestAnimationFrame(callback);
+  # Other browsers that do not yet support feature
+  else
+    return setTimeout(callback, 50);
+
+
+
 class DeferredView extends ContinuumView
   initialize : (options) ->
     @start_render = new Date()
@@ -147,10 +168,9 @@ class DeferredView extends ContinuumView
     @removed = true
 
   render_loop : () ->
-    #debugger;
     @render_deferred_components()
     if not @removed and @use_render_loop
-      setTimeout((() => @render_loop()), 20)
+      delay_render(() => @render_loop())
     else
       @looping = false
 
