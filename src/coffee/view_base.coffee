@@ -6,7 +6,7 @@ else
   this.Continuum = Continuum
 
 
-build_views = (mainmodel, view_storage, view_specs, options, view_options) ->
+build_views = (mainmodel, view_storage, view_specs, options, view_options, parent_view) ->
   # ## function : build_views
   # convenience function for creating a bunch of views from a spec
   # and storing them in a dictionary keyed off of model id.
@@ -47,6 +47,7 @@ build_views = (mainmodel, view_storage, view_specs, options, view_options) ->
     if not valid_viewmodels[key]
       value.remove()
       delete view_storage[key]
+    value.parent = parent_view
   return created_views
 
 Continuum.build_views = build_views
@@ -131,9 +132,10 @@ delay_render = (callback) ->
     return setTimeout(callback, 50);
 
 
-
+"""
 class DeferredView extends ContinuumView
   initialize : (options) ->
+    @parent = false
     @start_render = new Date()
     @end_render = new Date()
     @render_time = 50
@@ -158,6 +160,8 @@ class DeferredView extends ContinuumView
 
   request_render : () ->
     @_dirty = true
+    #if @parent
+      
 
   render_deferred_components : (force) ->
     if force or @_dirty
@@ -173,6 +177,52 @@ class DeferredView extends ContinuumView
       delay_render(() => @render_loop())
     else
       @looping = false
+"""
+
+
+class DeferredView extends ContinuumView
+  initialize : (options) ->
+    @parent = false
+    @start_render = new Date()
+    @end_render = new Date()
+    @render_time = 50
+    @deferred_parent = options['deferred_parent']
+    @request_render()
+    super(options)
+
+    @use_render_loop = options['render_loop']
+    if @use_render_loop
+      _.defer(() => @render_loop())
+
+  render : () ->
+    @start_render = new Date()
+    super()
+    console.log("DeferredView render", @)
+    @_dirty = false
+
+
+  render_end : () ->
+    @end_render = new Date()
+
+    @render_time = @end_render - @start_render
+
+  request_render : () ->
+    #@_dirty = true
+    if @parent and @parent.request_render
+      #console.log("calling request_render on the parent", @, @parent)
+      @parent.request_render()
+    else
+      console.log("calling delay_render")
+      delay_render(() =>
+        @render)
+      
+
+  remove : () ->
+    super()
+    @removed = true
+
+  render_loop : () ->
+    "pass"
 
 
 Continuum.DeferredView = DeferredView

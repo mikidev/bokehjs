@@ -55,7 +55,7 @@ class GridPlotContainerView extends Continuum.DeferredView
       for x in row
         @model.resolve_ref(x).set('usedialog', false)
         childspecs.push(x)
-    build_views(@model, @childviews, childspecs, {'scale': @options.scale})
+    build_views(@model, @childviews, childspecs, {'scale': @options.scale}, @)
 
   render_deferred_components : (force) ->
     super(force)
@@ -137,13 +137,13 @@ class PlotView extends Continuum.DeferredView
    {plot_id : @id, plot_model : @model, plot_view : @}
 
   build_renderers : ->
-    build_views(@model, @renderers, @mget('renderers'), @model_specs(), @options)
+    build_views(@model, @renderers, @mget('renderers'), @model_specs(), @options, @)
 
   build_axes : ->
-    build_views(@model, @axes, @mget('axes'), @model_specs(), @options)
+    build_views(@model, @axes, @mget('axes'), @model_specs(), @options, @)
 
   build_tools : ->
-    build_views(@model, @tools, @mget('tools'), @model_specs())
+    build_views(@model, @tools, @mget('tools'), @model_specs(), {}, @)
 
   build_overlays : ->
     #add ids of renderer views into the overlay spec
@@ -155,7 +155,7 @@ class PlotView extends Continuum.DeferredView
       overlayspec['options']['rendererviews'] = []
       for renderer in overlay.get('renderers')
         overlayspec['options']['rendererviews'].push(@renderers[renderer.id])
-    build_views(@model, @overlays, overlays, @model_specs())
+    build_views(@model, @overlays, overlays, @model_specs(), {}, @)
 
   bind_overlays : ->
     for overlayspec in @mget('overlays')
@@ -271,6 +271,9 @@ class PlotView extends Continuum.DeferredView
   render_deferred_components: (force) ->
     super(force)
     all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
+    @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
+    #for v in all_views
+    #  v.render_deferred_components(true)
     if _.any(all_views, (v) -> v._dirty)
       @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
       for v in all_views
@@ -687,13 +690,13 @@ class TableView extends Continuum.DeferredView
    {plot_id : @id, plot_model : @model, plot_view : @}
 
   build_renderers : ->
-    build_views(@model, @renderers, @mget('renderers'), @model_specs(), @options)
+    build_views(@model, @renderers, @mget('renderers'), @model_specs(), @options, @)
 
   build_axes : ->
-    build_views(@model, @axes, @mget('axes'), @model_specs(), @options)
+    build_views(@model, @axes, @mget('axes'), @model_specs(), @options, @)
 
   build_tools : ->
-    build_views(@model, @tools, @mget('tools'), @model_specs())
+    build_views(@model, @tools, @mget('tools'), @model_specs(), {}, @)
 
   build_overlays : ->
     #add ids of renderer views into the overlay spec
@@ -705,7 +708,7 @@ class TableView extends Continuum.DeferredView
       overlayspec['options']['rendererviews'] = []
       for renderer in overlay.get('renderers')
         overlayspec['options']['rendererviews'].push(@renderers[renderer.id])
-    build_views(@model, @overlays, overlays, @model_specs())
+    build_views(@model, @overlays, overlays, @model_specs(), {}, @)
 
   bind_overlays : ->
     for overlayspec in @mget('overlays')
@@ -767,10 +770,12 @@ class TableView extends Continuum.DeferredView
   render_deferred_components: (force) ->
     super(force)
     all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
-    if _.any(all_views, (v) -> v._dirty)
-      for v in all_views
-        v._dirty = true
-        v.render_deferred_components(true)
+    for v in all_views
+      v.render_deferred_components(true)
+    #if _.any(all_views, (v) -> v._dirty)
+    #  for v in all_views
+    #    v._dirty = true
+    #    v.render_deferred_components(true)
 
 
 class TableRendererView extends XYRendererView
