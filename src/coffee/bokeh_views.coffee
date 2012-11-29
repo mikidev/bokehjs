@@ -771,7 +771,8 @@ class TableView extends Continuum.DeferredView
     super(force)
     all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
     for v in all_views
-      v.render_deferred_components(true)
+      #v.render_deferred_components(true)
+      v.render()
     #if _.any(all_views, (v) -> v._dirty)
     #  for v in all_views
     #    v._dirty = true
