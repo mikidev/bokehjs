@@ -134,6 +134,7 @@ class PanToolView extends ToolView
 
   _set_base_point : (e) ->
     [@x, @y] = @mouse_coords(e, e.bokehX, e.bokehY)
+    @request_render()
     return null
 
   _drag_mapper : (mapper, diff) ->
@@ -148,16 +149,19 @@ class PanToolView extends ToolView
     }, {'local' : true})
 
   _drag : (e) ->
+      
     [x, y] = @mouse_coords(e, e.bokehX, e.bokehY)
     xdiff = x - @x
     ydiff = y - @y
     [@x, @y] = [x, y]
     xmappers = (@model.resolve_ref(x) for x in @mget('xmappers'))
     ymappers = (@model.resolve_ref(x) for x in @mget('ymappers'))
+    @request_render()
     for xmap in xmappers
       @_drag_mapper(xmap, xdiff)
     for ymap in ymappers
       @_drag_mapper(ymap, ydiff)
+    @request_render()
 
 
 class SelectionToolView extends ToolView

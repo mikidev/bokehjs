@@ -282,9 +282,6 @@ class PlotView extends Continuum.DeferredView
   render_deferred_components: (force) ->
     super(force)
     all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
-    #for v in all_views
-    #  v.render_deferred_components(true)
-    #debugger;
     try
       console.log("about to clear Rect", @constructor)
       @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
@@ -307,23 +304,6 @@ class XYRendererView extends PlotWidget
     safebind(this, @model, 'change', @request_render)
     safebind(this, @mget_ref('xmapper'), 'change', @request_render)
     safebind(this, @mget_ref('ymapper'), 'change', @request_render)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     safebind(this, @mget_ref('data_source'), 'change:data', @request_render)
     super(options)
 
@@ -418,7 +398,7 @@ class D3LinearAxisView extends PlotWidget
     current_tick = first_tick
     x_ticks = []
     last_tick_end = 0
-    #can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
+    can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
     while current_tick <= last_tick
       x_ticks.push(current_tick)
       text_width = can_ctx.measureText(current_tick.toString()).width
@@ -459,7 +439,7 @@ class D3LinearAxisView extends PlotWidget
     current_tick = first_tick
     y_ticks = []
     last_tick_end = 10000
-    #can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
+    can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
     while current_tick <= last_tick
       y_ticks.push(current_tick)
       y = (ypos(current_tick) + (@DEFAULT_TEXT_HEIGHT/2))
@@ -539,7 +519,7 @@ class D3LinearDateAxisView extends PlotWidget
     current_tick = first_tick
     x_ticks = []
     last_tick_end = 0
-    #can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
+    can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
     one_day = 3600 * 24 *1000
     time_string = true
     if (last_tick - first_tick)  > (one_day * 2)
@@ -600,7 +580,7 @@ class D3LinearDateAxisView extends PlotWidget
     y_ticks = []
     last_tick_end = 10000
 
-    #can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
+    can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
     while current_tick <= last_tick
       y_ticks.push(current_tick)
       y = (ypos(current_tick) + (@DEFAULT_TEXT_HEIGHT/2))

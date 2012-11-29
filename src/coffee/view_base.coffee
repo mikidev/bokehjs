@@ -193,17 +193,17 @@ class DeferredView extends ContinuumView
 
 
   render_deferred_components : () ->
-    console.log("render_deferred_components", @.constructor)
+    #console.log("render_deferred_components", @.constructor)
+    @render_requested = false
     "pass"
 
   render : () ->
     @render_requested = false
     @start_render = new Date()
     super()
-    console.log("DeferredView render for", @.constructor)
-    @render_deferred_components()
+    #console.log("DeferredView render for", @.constructor)
+    #@render_deferred_components()
     @_dirty = false
-
 
   render_end : () ->
     @end_render = new Date()
