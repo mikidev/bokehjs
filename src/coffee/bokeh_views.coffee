@@ -268,17 +268,33 @@ class PlotView extends Continuum.DeferredView
       @$el.append(view.$el)
     @render_end()
 
+  # render_deferred_components: (force) ->
+  #   super(force)
+  #   all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
+  #   @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
+  #   #for v in all_views
+  #   #  v.render_deferred_components(true)
+  #   if _.any(all_views, (v) -> v._dirty)
+  #     @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
+  #     for v in all_views
+  #       v._dirty = true
+  #       v.render_deferred_components(true)
+
   render_deferred_components: (force) ->
     super(force)
     all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
-    @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
     #for v in all_views
     #  v.render_deferred_components(true)
-    if _.any(all_views, (v) -> v._dirty)
+    #debugger;
+    try
       @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
       for v in all_views
         v._dirty = true
         v.render_deferred_components(true)
+        #v.render()
+    catch e
+      console.log("error deferred rendering, ", e )
+
 
 
 
@@ -384,7 +400,7 @@ class D3LinearAxisView extends PlotWidget
     current_tick = first_tick
     x_ticks = []
     last_tick_end = 0
-    can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
+    #can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
     while current_tick <= last_tick
       x_ticks.push(current_tick)
       text_width = can_ctx.measureText(current_tick.toString()).width
@@ -425,7 +441,7 @@ class D3LinearAxisView extends PlotWidget
     current_tick = first_tick
     y_ticks = []
     last_tick_end = 10000
-    can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
+    #can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
     while current_tick <= last_tick
       y_ticks.push(current_tick)
       y = (ypos(current_tick) + (@DEFAULT_TEXT_HEIGHT/2))
@@ -505,7 +521,7 @@ class D3LinearDateAxisView extends PlotWidget
     current_tick = first_tick
     x_ticks = []
     last_tick_end = 0
-    can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
+    #can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
     one_day = 3600 * 24 *1000
     time_string = true
     if (last_tick - first_tick)  > (one_day * 2)
@@ -565,7 +581,7 @@ class D3LinearDateAxisView extends PlotWidget
     y_ticks = []
     last_tick_end = 10000
 
-    can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
+    #can_ctx.clearRect(0, 0,  @mget('width'), @mget('height'))
     while current_tick <= last_tick
       y_ticks.push(current_tick)
       y = (ypos(current_tick) + (@DEFAULT_TEXT_HEIGHT/2))
@@ -771,8 +787,8 @@ class TableView extends Continuum.DeferredView
     super(force)
     all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
     for v in all_views
-      #v.render_deferred_components(true)
-      v.render()
+      v.render_deferred_components(true)
+      #v.render()
     #if _.any(all_views, (v) -> v._dirty)
     #  for v in all_views
     #    v._dirty = true

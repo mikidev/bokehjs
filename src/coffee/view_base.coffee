@@ -191,18 +191,16 @@ class DeferredView extends ContinuumView
     @request_render()
     super(options)
 
-    @use_render_loop = options['render_loop']
-    if @use_render_loop
-      _.defer(() => @render_loop())
 
   render_deferred_components : () ->
+    console.log("render_deferred_components", @.constructor)
     "pass"
 
   render : () ->
     @render_requested = false
     @start_render = new Date()
     super()
-    console.log("DeferredView render", @)
+    console.log("DeferredView render for", @.constructor)
     @render_deferred_components()
     @_dirty = false
 
@@ -218,10 +216,10 @@ class DeferredView extends ContinuumView
       #console.log("calling request_render on the parent", @, @parent)
       @parent.request_render()
     else if @render_requested == false
-      console.log("calling delay_render")
+      #console.log("requesting delay_render")
       @render_requested = true
       delay_render(() =>
-        @render)
+        @render())
       
       
 
@@ -229,8 +227,6 @@ class DeferredView extends ContinuumView
     super()
     @removed = true
 
-  render_loop : () ->
-    "pass"
 
 
 Continuum.DeferredView = DeferredView
