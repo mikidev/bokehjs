@@ -219,7 +219,7 @@ class DeferredView extends ContinuumView
       #console.log("requesting delay_render")
       @render_requested = true
       delay_render(() =>
-        @render())
+        @render_deferred_components())
       
       
 

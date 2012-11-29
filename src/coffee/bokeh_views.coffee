@@ -245,7 +245,6 @@ class PlotView extends Continuum.DeferredView
 
     o_w = @options.scale * @mget('outerwidth')
     o_h = @options.scale * @mget('outerheight')
-    #debugger;
     @main_can_wrapper.attr('style', "left:#{bord}px; height:#{h}px; width:#{w}px")
     @x_can_wrapper.attr('style', "left:#{bord}px; top:#{h}px; height:#{bord}px; width:#{w}px")
     @y_can_wrapper.attr('style', "width:#{bord}px; height:#{h}px;")
@@ -287,11 +286,12 @@ class PlotView extends Continuum.DeferredView
     #  v.render_deferred_components(true)
     #debugger;
     try
+      console.log("about to clear Rect", @constructor)
       @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
       for v in all_views
         v._dirty = true
         v.render_deferred_components(true)
-        #v.render()
+        v.render()
     catch e
       console.log("error deferred rendering, ", e )
 
@@ -307,6 +307,23 @@ class XYRendererView extends PlotWidget
     safebind(this, @model, 'change', @request_render)
     safebind(this, @mget_ref('xmapper'), 'change', @request_render)
     safebind(this, @mget_ref('ymapper'), 'change', @request_render)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     safebind(this, @mget_ref('data_source'), 'change:data', @request_render)
     super(options)
 
@@ -366,6 +383,7 @@ class D3LinearAxisView extends PlotWidget
 
   render : ->
     super()
+
     unselected_color = "#ccc"
     @plot_view.ctx.fillStyle = unselected_color
     @plot_view.ctx.strokeStyle = unselected_color
@@ -529,6 +547,7 @@ class D3LinearDateAxisView extends PlotWidget
     console.log((last_tick - first_tick), "diff ")
     console.log(one_day, "one_day")
     console.log(2* one_day, "two_day")
+    
     while current_tick <= last_tick
       x_ticks.push(current_tick)
       date_tick = new Date(current_tick)

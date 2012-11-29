@@ -60,7 +60,6 @@ test('test_updating_plot', ->
     	view = new Bokeh.PlotView('model' : plotmodel, 'render_loop' : true)
     	div.append(view.$el)
     	view.render()
-    	view.render()
     console.log('test_updating_plot')
     _.defer(myrender)
 
@@ -86,8 +85,10 @@ test('test_colors_plot', ->
     div.append(view.$el)		
     view.render();
     plotmodel.set({'width' : 300, 'height' : 300});
+    window.test_colors_plot = {'view':view, 'plotmodel':plotmodel};
   console.log("test_colors_plot")
   _.defer(myrender)
+
 );
 
 
