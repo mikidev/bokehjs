@@ -112,7 +112,7 @@ class GridPlotContainerView extends Continuum.DeferredView
       for x in row
         @model.resolve_ref(x).set('usedialog', false)
         childspecs.push(x)
-    build_views(@model, @childviews, childspecs, {'scale': @options.scale})
+    build_views(@model, @childviews, childspecs, {'scale': @options.scale}, @)
     @set_child_view_states()
 
   render_deferred_components : (force) ->
@@ -191,14 +191,13 @@ class PlotView extends Continuum.DeferredView
    {plot_id : @id, plot_model : @model, plot_view : @}
 
   build_renderers : ->
-    build_views(@model, @renderers, @mget('renderers'),
-        @model_specs(), @options)
+    build_views(@model, @renderers, @mget('renderers'), @model_specs(), @options, @)
 
   build_axes : ->
-    build_views(@model, @axes, @mget('axes'), @model_specs(), @options)
+    build_views(@model, @axes, @mget('axes'), @model_specs(), @options, @)
 
   build_tools : ->
-    build_views(@model, @tools, @mget('tools'), @model_specs())
+    build_views(@model, @tools, @mget('tools'), @model_specs(), {}, @)
 
   build_overlays : ->
     #add ids of renderer views into the overlay spec
@@ -210,7 +209,7 @@ class PlotView extends Continuum.DeferredView
       overlayspec['options']['rendererviews'] = []
       for renderer in overlay.get('renderers')
         overlayspec['options']['rendererviews'].push(@renderers[renderer.id])
-    build_views(@model, @overlays, overlays, @model_specs())
+    build_views(@model, @overlays, overlays, @model_specs(), {}, @)
 
   bind_overlays : ->
     for overlayspec in @mget('overlays')
@@ -336,14 +335,31 @@ class PlotView extends Continuum.DeferredView
       @$el.append(view.$el)
     @render_end()
 
+  # render_deferred_components: (force) ->
+  #   super(force)
+  #   all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
+  #   @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
+  #   #for v in all_views
+  #   #  v.render_deferred_components(true)
+  #   if _.any(all_views, (v) -> v._dirty)
+  #     @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
+  #     for v in all_views
+  #       v._dirty = true
+  #       v.render_deferred_components(true)
+
   render_deferred_components: (force) ->
     super(force)
     all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
-    if _.any(all_views, (v) -> v._dirty)
+    try
+      console.log("about to clear Rect", @constructor)
       @ctx.clearRect(0,0,  @viewstate.get('width'), @viewstate.get('height'))
       for v in all_views
         v._dirty = true
         v.render_deferred_components(true)
+        v.render()
+    catch e
+      console.log("error deferred rendering, ", e )
+
 
 build_views = Continuum.build_views
 class XYRendererView extends PlotWidget
@@ -462,6 +478,13 @@ class D3LinearAxisView extends PlotWidget
   convert_scale : (scale) ->
     domain = scale.domain()
     range = scale.range()
+
+  render : ->
+    super()
+
+    unselected_color = "#ccc"
+    @plot_view.ctx.fillStyle = unselected_color
+    @plot_view.ctx.strokeStyle = unselected_color
     if @mget('orientation') in ['bottom', 'top']
       func = 'xpos'
     else
@@ -501,6 +524,7 @@ class D3LinearAxisView extends PlotWidget
     current_tick = first_tick
     x_ticks = []
     last_tick_end = 0
+
     can_ctx.clearRect(0, 0,  @plot_view.viewstate.get('width'),
       @plot_view.viewstate.get('height'))
     while current_tick <= last_tick
@@ -567,8 +591,11 @@ class LineRendererView extends XYRendererView
     data = @model.get_ref('data_source').get('data')
     @calc_buffer(data)
 
-    @plot_view.ctx.fillStyle = @mget('foreground_color')
-    @plot_view.ctx.strokeStyle = @mget('foreground_color')
+    fg = @mget('foreground-color')
+    if fg
+      @plot_view.ctx.fillStyle = fg
+      @plot_view.ctx.strokeStyle = fg
+
     @plot_view.ctx.beginPath()
     @plot_view.ctx.moveTo(@screenx[0], @screeny[0])
     for idx in [1..@screenx.length]
@@ -597,8 +624,10 @@ class ScatterRendererView extends XYRendererView
     a = new Date()
     @calc_buffer(data)
     @plot_view.ctx.beginPath()
-    @plot_view.ctx.fillStyle = @mget('foreground_color')
-    @plot_view.ctx.strokeStyle = @mget('foreground_color')
+    fg = @mget('foreground_color')
+    if fg
+      @plot_view.ctx.fillStyle = @mget('foreground_color')
+      @plot_view.ctx.strokeStyle = @mget('foreground_color')
     color_field = @mget('color_field')
     ctx = @plot_view.ctx
     m2pi = Math.PI*2

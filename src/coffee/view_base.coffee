@@ -6,7 +6,7 @@ else
   this.Continuum = Continuum
 
 
-build_views = (mainmodel, view_storage, view_specs, options, view_options) ->
+build_views = (mainmodel, view_storage, view_specs, options, view_options, parent_view) ->
   # ## function : build_views
   # convenience function for creating a bunch of views from a spec
   # and storing them in a dictionary keyed off of model id.
@@ -47,6 +47,7 @@ build_views = (mainmodel, view_storage, view_specs, options, view_options) ->
     if not valid_viewmodels[key]
       value.remove()
       delete view_storage[key]
+    value.parent = parent_view
   return created_views
 
 Continuum.build_views = build_views
@@ -80,4 +81,153 @@ class ContinuumView extends Backbone.View
 
     return @model.get_ref(fld)
 
+  add_dialog : ->
+    # wraps a dialog window around this view.  This function assumes that the
+    # underlying model is a Component, so our OO hierarchy may be a bit leaky here.
+
+    position = () =>
+      @$el.dialog('widget').css({
+        'top' : @model.position_y() + "px",
+        'left' : @model.position_x() + "px"
+      })
+    @$el.dialog(
+      width : @mget('outerwidth') + 50,
+      maxHeight : $(window).height(),
+      close :  () =>
+        @remove()
+      dragStop : (event, ui) =>
+        top = parseInt(@$el.dialog('widget').css('top').split('px')[0])
+        left = parseInt(@$el.dialog('widget').css('left').split('px')[0])
+        xoff = @model.reverse_position_x(left);
+        yoff = @model.reverse_position_y(top);
+        @model.set({'offset' : [xoff, yoff]})
+        @model.save()
+    )
+    position()
+    #for some reason setting height at init time does not work!!
+    _.defer(() => @$el.dialog('option', 'height', @mget('outerheight') + 70))
+    safebind(this, @model, 'change:offset', position)
+    safebind(this, @model, 'change:outerwidth', ()->
+      @$el.dialog('option', 'width', @mget('outerwidth')))
+    safebind(this, @model, 'change:outerheight', ()->
+      @$el.dialog('option', 'height', @mget('outerheight')))
+
+
+
+delay_render = (callback) ->
+  #Future-proof: when feature is fully standardized
+  if (window.requestAnimationFrame)
+    return window.requestAnimationFrame(callback);
+  #IE implementation
+  else if (window.msRequestAnimationFrame)
+    return window.msRequestAnimationFrame(callback);
+  # Firefox implementation
+  else if (window.mozRequestAnimationFrame)
+    return window.mozRequestAnimationFrame(callback);
+  # Chrome implementation
+  else if (window.webkitRequestAnimationFrame)
+    return window.webkitRequestAnimationFrame(callback);
+  # Other browsers that do not yet support feature
+  else
+    return setTimeout(callback, 50);
+
+
+"""
+class DeferredView extends ContinuumView
+  initialize : (options) ->
+    @parent = false
+    @start_render = new Date()
+    @end_render = new Date()
+    @render_time = 50
+    @deferred_parent = options['deferred_parent']
+    @request_render()
+    super(options)
+
+    @use_render_loop = options['render_loop']
+    if @use_render_loop
+      _.defer(() => @render_loop())
+
+  render : () ->
+    @start_render = new Date()
+    super()
+    @_dirty = false
+
+
+  render_end : () ->
+    @end_render = new Date()
+
+    @render_time = @end_render - @start_render
+
+  request_render : () ->
+    @_dirty = true
+    #if @parent
+      
+
+  render_deferred_components : (force) ->
+    if force or @_dirty
+      @render()
+
+  remove : () ->
+    super()
+    @removed = true
+
+  render_loop : () ->
+    @render_deferred_components()
+    if not @removed and @use_render_loop
+      delay_render(() => @render_loop())
+    else
+      @looping = false
+"""
+
+
+class DeferredView extends ContinuumView
+  initialize : (options) ->
+    @parent = false
+    @start_render = new Date()
+    @end_render = new Date()
+    @render_time = 50
+    @deferred_parent = options['deferred_parent']
+    @render_requested = false
+    @request_render()
+    super(options)
+
+
+  render_deferred_components : () ->
+    #console.log("render_deferred_components", @.constructor)
+    @render_requested = false
+    "pass"
+
+  render : () ->
+    @render_requested = false
+    @start_render = new Date()
+    super()
+    #console.log("DeferredView render for", @.constructor)
+    #@render_deferred_components()
+    @_dirty = false
+
+  render_end : () ->
+    @end_render = new Date()
+
+    @render_time = @end_render - @start_render
+
+  request_render : () ->
+    #@_dirty = true
+    if @parent and @parent.request_render
+      #console.log("calling request_render on the parent", @, @parent)
+      @parent.request_render()
+    else if @render_requested == false
+      #console.log("requesting delay_render")
+      @render_requested = true
+      delay_render(() =>
+        @render_deferred_components())
+      
+      
+
+  remove : () ->
+    super()
+    @removed = true
+
+
+
+Continuum.DeferredView = DeferredView
 Continuum.ContinuumView = ContinuumView
