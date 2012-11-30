@@ -84,6 +84,7 @@ test('test_colors_plot', ->
       'model' : plotmodel,
       'render_loop' : true)
     div.append(view.$el)
+    #view.viewstate.set({'width' : 300, 'height' : 300});
     view.render();
     view.viewstate.set({'width' : 300, 'height' : 300});
     window.test_colors_plot = {'view':view, 'plotmodel':plotmodel};
