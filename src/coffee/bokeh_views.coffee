@@ -6,53 +6,6 @@ else
 safebind = Continuum.safebind
 
 
-class DeferredView extends Continuum.ContinuumView
-  initialize : (options) ->
-    @start_render = new Date()
-    @end_render = new Date()
-    @render_time = 50
-    @deferred_parent = options['deferred_parent']
-    @request_render()
-    super(options)
-
-    @use_render_loop = options['render_loop']
-    if @use_render_loop
-      _.defer(() => @render_loop())
-
-  render : () ->
-    @start_render = new Date()
-    super()
-    @_dirty = false
-
-
-  render_end : () ->
-    @end_render = new Date()
-
-    @render_time = @end_render - @start_render
-
-  request_render : () ->
-    @_dirty = true
-
-  render_deferred_components : (force) ->
-    if force or @_dirty
-      @render()
-
-  remove : () ->
-    super()
-    @removed = true
-
-  render_loop : () ->
-    #debugger;
-    @render_deferred_components()
-    if not @removed and @use_render_loop
-      setTimeout((() => @render_loop()), 20)
-    else
-      @looping = false
-
-
-Continuum.DeferredView = DeferredView
-
-
 class PlotWidget extends Continuum.DeferredView
   tagName : 'div'
   marksize : 3
@@ -62,8 +15,9 @@ class PlotWidget extends Continuum.DeferredView
     @plot_model = options.plot_model
     @plot_view = options.plot_view
     safebind(this, @plot_view.viewstate, 'change', ()->
-        console.log('CHANGE')
-        @request_render()
+        #console.log('CHANGE rendering', @plot_view)
+        @plot_view.render()
+        @plot_view.request_render()
     )
 
   addPolygon: (x,y) ->
@@ -335,30 +289,18 @@ class PlotView extends Continuum.DeferredView
       @$el.append(view.$el)
     @render_end()
 
-  # render_deferred_components: (force) ->
-  #   super(force)
-  #   all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
-  #   @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
-  #   #for v in all_views
-  #   #  v.render_deferred_components(true)
-  #   if _.any(all_views, (v) -> v._dirty)
-  #     @ctx.clearRect(0,0,  @mget('width'), @mget('height'))
-  #     for v in all_views
-  #       v._dirty = true
-  #       v.render_deferred_components(true)
-
   render_deferred_components: (force) ->
     super(force)
     all_views = _.flatten(_.map([@tools, @axes, @renderers, @overlays], _.values))
     try
-      console.log("about to clear Rect", @constructor)
+      #console.log("about to clear Rect", @constructor)
       @ctx.clearRect(0,0,  @viewstate.get('width'), @viewstate.get('height'))
       for v in all_views
         v._dirty = true
         v.render_deferred_components(true)
         v.render()
     catch e
-      console.log("error deferred rendering, ", e )
+      #console.log("error deferred rendering, ", e )
 
 
 build_views = Continuum.build_views
@@ -372,6 +314,8 @@ class XYRendererView extends PlotWidget
     @set_ymapper()
     safebind(this, @model, 'change:xdata_range', @set_xmapper)
     safebind(this, @model, 'change:ydata_range', @set_ymapper)
+    safebind(this, @model, 'change:xdata_range', @request_render)
+    safebind(this, @model, 'change:ydata_range', @request_render)
     safebind(this, @mget_ref('xdata_range'), 'change', @request_render)
     safebind(this, @mget_ref('ydata_range'), 'change', @request_render)
   set_xmapper : () ->
@@ -613,7 +557,7 @@ class LineRendererView extends XYRendererView
 class ScatterRendererView extends XYRendererView
   render : ->
     "use strict";
-    console.log('scatter renderer render')
+    #console.log('scatter renderer render')
     super()
     if @model.get_ref('data_source').get('selecting') == true
         #skip data sources which are not selecting'

@@ -132,53 +132,6 @@ delay_render = (callback) ->
     return setTimeout(callback, 50);
 
 
-"""
-class DeferredView extends ContinuumView
-  initialize : (options) ->
-    @parent = false
-    @start_render = new Date()
-    @end_render = new Date()
-    @render_time = 50
-    @deferred_parent = options['deferred_parent']
-    @request_render()
-    super(options)
-
-    @use_render_loop = options['render_loop']
-    if @use_render_loop
-      _.defer(() => @render_loop())
-
-  render : () ->
-    @start_render = new Date()
-    super()
-    @_dirty = false
-
-
-  render_end : () ->
-    @end_render = new Date()
-
-    @render_time = @end_render - @start_render
-
-  request_render : () ->
-    @_dirty = true
-    #if @parent
-      
-
-  render_deferred_components : (force) ->
-    if force or @_dirty
-      @render()
-
-  remove : () ->
-    super()
-    @removed = true
-
-  render_loop : () ->
-    @render_deferred_components()
-    if not @removed and @use_render_loop
-      delay_render(() => @render_loop())
-    else
-      @looping = false
-"""
-
 
 class DeferredView extends ContinuumView
   initialize : (options) ->
