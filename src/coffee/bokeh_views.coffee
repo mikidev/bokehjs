@@ -70,10 +70,12 @@ class GridPlotContainerView extends Continuum.DeferredView
     @set_child_view_states()
 
   render_deferred_components : (force) ->
-    super(force)
-    for row, ridx in @mget('children')
-      for plotspec, cidx in row
-        @childviews[plotspec.id].render_deferred_components(force)
+    "pass"
+    
+    # super(force)
+    # for row, ridx in @mget('children')
+    #   for plotspec, cidx in row
+    #     @childviews[plotspec.id].render_deferred_components(force)
 
   render : ->
     super()
@@ -246,6 +248,9 @@ class PlotView extends Continuum.DeferredView
     @main_can_wrapper = @$el.find('.main_can_wrapper')
     @x_can_wrapper = @$el.find('.x_can_wrapper')
     @y_can_wrapper = @$el.find('.y_can_wrapper')
+    @x_can_ctx = @x_can.getContext('2d')
+    @y_can_ctx = @y_can.getContext('2d')
+    @ctx = @canvas[0].getContext('2d')
     @render()
     @bind_tools()
     @bind_overlays()
@@ -280,9 +285,6 @@ class PlotView extends Continuum.DeferredView
     wh(@x_can, w, bord)
     wh(@y_can, bord, h)
 
-    @x_can_ctx = @x_can.getContext('2d')
-    @y_can_ctx = @y_can.getContext('2d')
-    @ctx = @canvas[0].getContext('2d')
     for own key, view of @axes
       @$el.append(view.$el)
     for own key, view of @renderers
@@ -300,6 +302,7 @@ class PlotView extends Continuum.DeferredView
         v.render_deferred_components(true)
         v.render()
     catch e
+      "pass"
       #console.log("error deferred rendering, ", e )
 
 
