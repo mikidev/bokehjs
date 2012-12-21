@@ -222,7 +222,11 @@ class DataFactorRange extends FactorRange
   type : 'DataFactorRange'
 
   _get_values : () =>
+<<<<<<< HEAD
     columns = (@get_ref('data_source').getcolumn(x) for x in @get('columns'))
+=======
+    columns = (@get_obj('data_source').getcolumn(x) for x in @get('columns'))
+>>>>>>> f974bcf4face64d5ae900a35277f22947e7a4b48
     columns = _.reduce(columns, ((x, y) -> return x.concat(y)), [])
     temp = {}
     for val in columns
@@ -236,7 +240,11 @@ class DataFactorRange extends FactorRange
     @register_property
     @register_property('values', @_get_values, true)
     @add_dependencies('values', this, ['data_source', 'columns'])
+<<<<<<< HEAD
     @add_dependencies('values', @get_ref('data_source'),
+=======
+    @add_dependencies('values', @get_obj('data_source'),
+>>>>>>> f974bcf4face64d5ae900a35277f22947e7a4b48
       ['data_source', 'columns'])
 
 
@@ -298,7 +306,11 @@ class DiscreteColorMapper extends HasProperties
 
   _get_factor_map : () =>
     domain_map = {}
+<<<<<<< HEAD
     for val, index in @get_ref('data_range').get('values')
+=======
+    for val, index in @get_obj('data_range').get('values')
+>>>>>>> f974bcf4face64d5ae900a35277f22947e7a4b48
       domain_map[val] = index
     return domain_map
 
@@ -545,6 +557,7 @@ _.extend(ScatterRenderer::defaults, {
     mark : 'circle',
 })
 
+<<<<<<< HEAD
 ScatterRenderer::display_defaults = _.clone(ScatterRenderer::display_defaults)
 _.extend(ScatterRenderer::display_defaults, {
   radius : 3
@@ -552,6 +565,29 @@ _.extend(ScatterRenderer::display_defaults, {
 
 class ScatterRenderers extends Continuum.Collection
   model : ScatterRenderer
+=======
+class ScatterRenderers extends Continuum.Collection
+  model : ScatterRenderer
+
+class GlyphRenderer extends HasParent
+  type : 'GlyphRenderer'
+  default_view : Bokeh.GlyphRendererView
+
+GlyphRenderer::defaults = _.clone(GlyphRenderer::defaults)
+_.extend(GlyphRenderer::defaults,
+  data_source : null
+  scatter_size : 3
+  color : 'black'
+)
+
+GlyphRenderer::display_defaults = _.clone(GlyphRenderer::display_defaults)
+_.extend(GlyphRenderer::display_defaults, {
+  radius : 3
+})
+
+class GlyphRenderers extends Continuum.Collection
+  model : GlyphRenderer
+>>>>>>> f974bcf4face64d5ae900a35277f22947e7a4b48
 
 
 
@@ -623,6 +659,10 @@ class ScatterSelectionOverlays extends Continuum.Collection
 #Preparing the name space
 Bokeh.register_collection('Plot', new Plots)
 Bokeh.register_collection('ScatterRenderer', new ScatterRenderers)
+<<<<<<< HEAD
+=======
+Bokeh.register_collection('GlyphRenderer', new GlyphRenderers)
+>>>>>>> f974bcf4face64d5ae900a35277f22947e7a4b48
 Bokeh.register_collection('LineRenderer', new LineRenderers)
 Bokeh.register_collection('BarRenderer', new BarRenderers)
 Bokeh.register_collection('ObjectArrayDataSource', new ObjectArrayDataSources)
