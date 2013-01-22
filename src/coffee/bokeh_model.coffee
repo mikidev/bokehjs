@@ -146,14 +146,22 @@ class DataRange1d extends Range1d
   type : 'DataRange1d'
 
   _get_minmax : () ->
-    columns = []
+    #columns = []
+    min = Infinity
+    max = -Infinity
     for source in @get('sources')
       sourceobj = @resolve_ref(source['ref'])
       for colname in source['columns']
-        columns.push(sourceobj.getcolumn(colname))
-    columns = _.reduce(columns, ((x, y) -> return x.concat(y)), [])
-    columns = _.filter(columns, (x) -> typeof(x) != "string")
-    [min, max] = [_.min(columns), _.max(columns)]
+        #columns.push(sourceobj.getcolumn(colname))
+        for val in sourceobj.getcolumn(colname)
+          if typeof(val) != "string"
+            if val > max
+              max = val
+            if val < min
+              min = val
+    #columns = _.reduce(columns, ((x, y) -> return x.concat(y)), [])
+    #columns = _.filter(columns, (x) -> typeof(x) != "string")
+    #[min, max] = [_.min(columns), _.max(columns)]
     span = (max - min) * (1 + @get('rangepadding'))
     center = (max + min) / 2.0
     [min, max] = [center - span/2.0, center + span/2.0]
