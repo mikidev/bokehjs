@@ -14,7 +14,7 @@ class TestObjects extends Backbone.Collection
 # registering this test collection with Collections function
 testobjects = new TestObjects()
 exports.testobjects = testobjects
-base.locations['TestObject'] = ['./unittest/hasproperty_test', 'testobjects']
+base.locations['TestObject'] = ['./hasproperty_test', 'testobjects']
 
 test('computed_properties', ->
   testobjects.reset()

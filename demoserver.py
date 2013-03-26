@@ -1,19 +1,19 @@
 import flask
-import hemlib
+from continuumweb import hemlib
 import json
 import os
 from os.path import join
 import subprocess
 import sys
-
+hemlib.slug_path = os.path.dirname(__file__)
 app = flask.Flask(__name__)
 
 SRCDIR = "static/coffee"
 DEMO_SRCDIR = "demo/coffee"
+TEST_SRCDIR = "tests/coffee"
 # TODO: Should be able to remove EXCLUDES now that demo and tests have
 # been moved out.
-EXCLUDES = [join(SRCDIR,"demo"), join(SRCDIR,"unittest"),
-            join(SRCDIR,"unittest/primitives")]
+EXCLUDES = []
 
 HOST = "localhost"
 PORT = 9294
@@ -56,10 +56,10 @@ def test(testname):
         jslibs= ['/static/js/tests/application.js']
         hemfiles = []
     tests = alltests[testname]
-    testfiles = [os.path.join(SRCDIR, name+".coffee") for name in tests]
+    testfiles = [os.path.join(TEST_SRCDIR, name+".coffee") for name in tests]
     for test in testfiles:
         if not os.path.isfile(test):
-            raise RuntimeError("Cannot find test named '%s'"%demo)
+            raise RuntimeError("Cannot find test named '%s'"%test)
 
     hemfiles.extend(hemlib.make_urls(testfiles, HOST, PORT))
 
@@ -107,9 +107,9 @@ alltests = {
     ],
 
     'allunit' : [
-        "unittest/bokeh_test",
-        "unittest/hasparent_test",
-        "unittest/hasproperty_test"
+        "bokeh_test",
+        "hasparent_test",
+        "hasproperty_test"
     ],
 
     'tick' : ['unittest/tick_test'],
