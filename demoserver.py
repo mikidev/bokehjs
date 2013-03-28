@@ -9,6 +9,7 @@ hemlib.slug_path = os.path.dirname(__file__)
 app = flask.Flask(__name__)
 
 SRCDIR = "static/coffee"
+TEST_SRCDIR = "tests/coffee"
 DEMO_SRCDIR = "demo/coffee"
 TEST_SRCDIR = "tests/coffee"
 # TODO: Should be able to remove EXCLUDES now that demo and tests have
@@ -42,7 +43,7 @@ def demo(demoname):
     hemfiles.extend(hemlib.make_urls(demofiles, HOST, PORT))
 
     return flask.render_template("demos.html", jslibs = jslibs,
-            hemfiles=hemfiles, demos=demos)
+                                 hemfiles=hemfiles, demos=demos)
 
 @app.route("/test/<testname>")
 def test(testname):
@@ -51,15 +52,16 @@ def test(testname):
             slug = json.load(f)
         jslibs = hemlib.slug_libs(app, slug['libs'])
         hemfiles = hemlib.coffee_assets(SRCDIR, HOST, PORT,
-                    excludes=EXCLUDES)
+                                        excludes=EXCLUDES)
     else:
         jslibs= ['/static/js/tests/application.js']
         hemfiles = []
+    print "demoserver hemfiles", hemfiles
     tests = alltests[testname]
     testfiles = [os.path.join(TEST_SRCDIR, name+".coffee") for name in tests]
     for test in testfiles:
         if not os.path.isfile(test):
-            raise RuntimeError("Cannot find test named '%s'"%test)
+            raise RuntimeError("Cannot find test named '%s'" % test)
 
     hemfiles.extend(hemlib.make_urls(testfiles, HOST, PORT))
 
@@ -99,11 +101,11 @@ alldemos = {
 alltests = {
 
     'allplots' : [
-        "unittest/plot_test_simple",
-        "unittest/tools_test",
-        "unittest/plot_test_grid",
-        "unittest/date_test",
-        "unittest/legend_test"
+        "plot_test_simple",
+        "tools_test",
+        "plot_test_grid",
+        "date_test",
+        "legend_test"
     ],
 
     'allunit' : [
@@ -112,45 +114,44 @@ alltests = {
         "hasproperty_test"
     ],
     'layout' : ['layout_test'],
-    'tick' : ['unittest/tick_test'],
-
-    'perf' : ['unittest/perf_test'],
+    'tick' : ['tick_test'],
+    'perf' : ['perf_test'],
 
     'prim' : [
-        'unittest/primitives/annular_wedge_test',
-        'unittest/primitives/annulus_test',
-        'unittest/primitives/arc_test',
-        'unittest/primitives/area_test',
-        'unittest/primitives/bezier_test',
-        'unittest/primitives/circle_test',
-        'unittest/primitives/imageuri_test',
-        'unittest/primitives/line_test',
-        'unittest/primitives/oval_test',
-        'unittest/primitives/quad_test',
-        'unittest/primitives/quadcurve_test',
-        'unittest/primitives/ray_test',
-        'unittest/primitives/rect_test',
-        'unittest/primitives/segment_test',
-        'unittest/primitives/text_test',
-        'unittest/primitives/wedge_test',
+        'primitives/annular_wedge_test',
+        'primitives/annulus_test',
+        'primitives/arc_test',
+        'primitives/area_test',
+        'primitives/bezier_test',
+        'primitives/circle_test',
+        'primitives/image_uri_test',
+        'primitives/line_test',
+        'primitives/oval_test',
+        'primitives/quad_test',
+        'primitives/quadcurve_test',
+        'primitives/ray_test',
+        'primitives/rect_test',
+        'primitives/segment_test',
+        'primitives/text_test',
+        'primitives/wedge_test',
     ],
 
-    'annular_wedge' : ['unittest/primitives/annular_wedge_test'],
-    'annulus'       : ['unittest/primitives/annulus_test'],
-    'arc'           : ['unittest/primitives/arc_test'],
-    'area'          : ['unittest/primitives/area_test'],
-    'bezier'        : ['unittest/primitives/bezier_test'],
-    'circle'        : ['unittest/primitives/circle_test'],
-    'imageuri'      : ['unittest/primitives/imageuri_test'],
-    'line'          : ['unittest/primitives/line_test'],
-    'oval'          : ['unittest/primitives/oval_test'],
-    'quad'          : ['unittest/primitives/quad_test'],
-    'quadcurve'     : ['unittest/primitives/quadcurve_test'],
-    'ray'           : ['unittest/primitives/ray_test'],
-    'rect'          : ['unittest/primitives/rect_test'],
-    'segment'       : ['unittest/primitives/segment_test'],
-    'text'          : ['unittest/primitives/text_test'],
-    'wedge'         : ['unittest/primitives/wedge_test'],
+    'annular_wedge' : ['primitives/annular_wedge_test'],
+    'annulus'       : ['primitives/annulus_test'],
+    'arc'           : ['primitives/arc_test'],
+    'area'          : ['primitives/area_test'],
+    'bezier'        : ['primitives/bezier_test'],
+    'circle'        : ['primitives/circle_test'],
+    'image_uri'     : ['primitives/image_uri_test'],
+    'line'          : ['primitives/line_test'],
+    'oval'          : ['primitives/oval_test'],
+    'quad'          : ['primitives/quad_test'],
+    'quadcurve'     : ['primitives/quadcurve_test'],
+    'ray'           : ['primitives/ray_test'],
+    'rect'          : ['primitives/rect_test'],
+    'segment'       : ['primitives/segment_test'],
+    'text'          : ['primitives/text_test'],
+    'wedge'         : ['primitives/wedge_test'],
 }
 
 allpossibletests = set()

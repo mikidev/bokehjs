@@ -1,33 +1,42 @@
 Collections = require('base').Collections
 
+all_palettes = require('../palettes/palettes').all_palettes
+ColorMapper = require('../color_mapper').ColorMapper
+
 NUM_SAMPLES = 1024
 SAMPLING_RATE = 44100
 MAX_FREQ = SAMPLING_RATE / 2
 FREQ_SAMPLES = NUM_SAMPLES / 8
 SPECTROGRAM_LENGTH = 512
-FREQ_MAX=512
-FREQ_MIN=0
+FREQ_MAX = 512
+FREQ_MIN = 0
 
 NGRAMS = 1020
 
 HISTSIZE = 256
 NUM_BINS = 16
 
-TIMESLICE = 35 # ms
+window.TIMESLICE = 40 # ms
 
 GAIN_DEFAULT = 1
 GAIN_MIN = 1
 GAIN_MAX = 20
+requestAnimationFrame = window.requestAnimationFrame || \
+  window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame ||\
+  window.msRequestAnimationFrame
 
 class Spectrogram
   constructor: () ->
 
     @gain = GAIN_DEFAULT
+    @last_render = new Date()
 
+    @paused = false
+    @throttled_request_data = _.throttle((=> @request_data()), 10)
     # Set up image plot for the spectrogram
     @image_width = NGRAMS
     @image_height = 256
-    @image = [new Float32Array(SPECTROGRAM_LENGTH * NGRAMS)]
+    @image = [new ArrayBuffer(SPECTROGRAM_LENGTH * NGRAMS * 4)]
     @spec_source = Collections('ColumnDataSource').create(
       data:{image: @image}
     )
@@ -38,7 +47,7 @@ class Spectrogram
     @power = [new Float32Array(NUM_SAMPLES)]
     @power_idx = [new Array(NUM_SAMPLES)]
     for i in [0..@power_idx[0].length-1]
-      @power_idx[0][i] = (i/(@power_idx[0].length-1))*TIMESLICE
+      @power_idx[0][i] = (i/(@power_idx[0].length-1))*window.TIMESLICE
     @power_source = Collections('ColumnDataSource').create(
       data:{power: @power, idx: @power_idx}
     )
@@ -65,16 +74,29 @@ class Spectrogram
 
     @render()
 
-  request_data: () =>
+  request_data: () ->
+    if @paused
+      return
     $.ajax 'http://localhost:5000/data',
     type: 'GET'
     dataType: 'json'
     error: (jqXHR, textStatus, errorThrown) =>
-      console.log "AJAX Error: #{textStatus}"
-    success: (data, textStatus, jqXHR) =>
-      @on_data(data)
 
-  on_data: (data) =>
+      #console.log "AJAX Error: #{textStatus}"
+    success: (data, textStatus, jqXHR) =>
+      if not data[0]?
+        _.delay((=> @throttled_request_data), 130)
+      else  
+        @on_data(data)
+        requestAnimationFrame(
+          => @throttled_request_data())
+
+
+    new_render = new Date()
+    #console.log("render_time", new_render - @last_render)
+    @last_render = new_render
+
+  on_data: (data) ->
     if not data[0]?
       return
 
@@ -84,11 +106,17 @@ class Spectrogram
     for i in [0..(data[1].length-1)]
       data[1][i] *= @gain
 
+    cmap = new ColorMapper(all_palettes["YlGnBu-9"], 0, 10)
+    buf = cmap.v_map_screen(data[0])
+
+    image32 = new Uint32Array(@image[0])
+    buf32 = new Uint32Array(buf)
+
     # update the spectrogram
     for i in [0..(SPECTROGRAM_LENGTH-1)]
       for j in [(NGRAMS-1)..1]
-        @image[0][i*NGRAMS + j] = @image[0][i*NGRAMS + j - 1]
-      @image[0][i*NGRAMS] = data[0][i]
+        image32[i*NGRAMS + j] = image32[i*NGRAMS + j - 1]
+      image32[i*NGRAMS] = buf32[i]
     @spec_source.set('data', {image: @image})
     @spec_source.trigger('change', @spec_source, {})
 
@@ -143,13 +171,13 @@ class Spectrogram
     })
     @hist_source.trigger('change', @power_source, {})
 
-  set_freq_range : (event, ui) =>
+  set_freq_range : (event, ui) ->
     [min, max] = ui.values
     @fft_xrange.set({'start': min, 'end' : max})
     return null
 
   render: () ->
-    sliders = $('<div></div>')
+    controls = $('<div></div>')
 
     slider = $('<div></div>')
     label = $("<p style>frequency range:</p>")
@@ -167,8 +195,7 @@ class Spectrogram
     slider.append(slider_div)
     slider.css('float', 'left')
     slider.css('margin', '30px')
-
-    sliders.append(slider)
+    controls.append(slider)
 
     slider = $('<div></div>')
     slider.append($("<p>gain:</p>"))
@@ -186,13 +213,24 @@ class Spectrogram
     slider.append(slider_div)
     slider.css('float', 'left')
     slider.css('margin', '30px')
+    controls.append(slider)
 
-    sliders.append(slider)
+    button = $('<button id="pause">pause</button>')
+    button.on("click", () =>
+      if button.text() == 'pause'
+        button.text('resume')
+        @paused = true
+      else
+        button.text('pause')
+        @paused = false
+        @request_data())
 
-    sliders.css('clear', 'both')
-    sliders.css('overflow', 'hidden')
+    controls.append(button)
+
+    controls.css('clear', 'both')
+    controls.css('overflow', 'hidden')
     $( "#gain" ).val( $( "#gain-slider" ).slider( "value" ) );
-    $('body').append(sliders)
+    $('body').append(controls)
 
     div = $('<div></div>')
     $('body').append(div)
@@ -231,7 +269,7 @@ class Spectrogram
     )
 
     glyphspec = {
-      type: 'image'
+      type: 'image_rgba'
       x: 0
       y: 0
       dw: NGRAMS
@@ -262,7 +300,7 @@ class Spectrogram
   create_power: () ->
     plot_model = Collections('Plot').create()
 
-    xrange = Collections('Range1d').create({start: 0, end: TIMESLICE})
+    xrange = Collections('Range1d').create({start: 0, end: window.TIMESLICE})
     yrange = Collections('Range1d').create({start: -0.25, end: 0.25})
 
     xaxis = Collections('LinearAxis').create(
@@ -354,7 +392,6 @@ class Spectrogram
       outer_radius: 'outer_radius'
       start_angle: 'start_angle'
       end_angle: 'end_angle'
-      direction: 'clock'
     }
     glyph = Collections('GlyphRenderer').create({
       data_source: @hist_source.ref()
@@ -375,4 +412,8 @@ class Spectrogram
 
 $(document).ready () ->
   spec = new Spectrogram()
-  setInterval(spec.request_data, TIMESLICE)
+  setInterval((() ->
+    spec.request_data()),
+    400)
+    
+
