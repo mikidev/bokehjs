@@ -1,5 +1,5 @@
 base = require("./base")
-hbox = require("./layout/hbox")
+layout = require("./layout/index")
 Collections = base.Collections
 
 test('hbox', () ->
@@ -12,7 +12,7 @@ test('hbox', () ->
     node.css('background-color', color)
     node.css('height', '100%')
     node.css('width', '100%')
-  view = new hbox.HBoxView(
+  view = new layout.HBoxView(
     elements : [first, second, third]
     height : 100
     width : 300
@@ -31,7 +31,7 @@ test('vbox', () ->
     node.css('background-color', color)
     node.css('height', '100%')
     node.css('width', '100%')
-  view = new hbox.VBoxView(
+  view = new layout.VBoxView(
     elements : [first, second, third]
     height : 300
     width : 100
@@ -51,13 +51,13 @@ test('test_nested', () ->
       node.css('background-color', color)
       node.css('height', '100%')
       node.css('width', '100%')
-    view = new hbox.HBoxView(
+    view = new layout.HBoxView(
       elements : [first, second, third]
       width : 300
       height : '100%'
     )
     views.push(view)
-  view = new hbox.VBoxView(
+  view = new layout.VBoxView(
     elements : [views[0].el, views[1].el]
     width : 300
     height : 300
