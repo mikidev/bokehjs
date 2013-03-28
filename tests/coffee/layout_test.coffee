@@ -38,3 +38,29 @@ test('vbox', () ->
   )
   $('body').append(view.el)
 )
+
+test('test_nested', () ->
+  expect(0)
+  views = []
+  for c in [1,2]
+    first = $('<div>div1</div>')
+    second = $('<div>div2</div>')
+    third = $('<div>div3</div>')
+    for temp in _.zip([first, second, third], ['red', 'yellow', 'green'])
+      [node, color] = temp
+      node.css('background-color', color)
+      node.css('height', '100%')
+      node.css('width', '100%')
+    view = new hbox.HBoxView(
+      elements : [first, second, third]
+      width : 300
+      height : '100%'
+    )
+    views.push(view)
+  view = new hbox.VBoxView(
+    elements : [views[0].el, views[1].el]
+    width : 300
+    height : 300
+  )
+  $('body').append(view.el)
+)
