@@ -1,12 +1,16 @@
 base = require("../base")
 events = require("./events")
 hboxtemplate = require("./hboxtemplate")
+vboxtemplate = require("./vboxtemplate")
+
 ContinuumView = base.ContinuumView
 
-class HBoxView extends ContinuumView
-  attributes :
-    class : 'hbox'
-
+class SlideableLayout extends ContinuumView
+  dim : null #width
+  mouse_coord : null #pageX
+  component_selector : null #hcomponent
+  content_selector : null #hcontent
+  template : null
   initialize : (options) ->
     super(options)
     if options.elements
@@ -19,28 +23,25 @@ class HBoxView extends ContinuumView
     @eventgenerator = new events.TwoPointEventGenerator()
 
   set_sizes : () ->
-    for temp in _.zip(@$el.find('.hcomponent'), @sizes)
+    for temp in _.zip(@$el.find(@component_selector), @sizes)
       [el, size] = temp
-      $(el).css('width', String(size) + "%")
+      $(el).css(@dim, String(size) + "%")
     return null
 
   render : () ->
     if @views
       _.map(@views, (view) -> view.$el.detach())
     @$el.html('')
-    @$el.html(hboxtemplate({elements : @elements}))
-    for temp in _.zip(@$('.hcontent'), @elements)
-      [hcontent, node] = temp
-      $(hcontent).append(node)
+    @$el.html(@template({elements : @elements}))
+    for temp in _.zip(@$(@content_selector), @elements)
+      [content, node] = temp
+      $(content).append(node)
     if @height
       @$el.height(@height)
     if @width
       @$el.width(@width)
     @set_sizes()
     return @
-
-  events :
-    "mousedown .hseparator" :  'handle_click'
 
   delegateEvents : (events) ->
     super(events)
@@ -53,15 +54,38 @@ class HBoxView extends ContinuumView
     e.preventDefault()
 
   mousemove : (basepoint, last_coords, coords) =>
-    diff = coords.pageX - last_coords.pageX
-    console.log(diff, @$el.width())
-    percentage_delta = (100 * diff / @$el.width())
+    diff = coords[@mouse_coord] - last_coords[@mouse_coord]
+    percentage_delta = (100 * diff / @$el[@dim]())
     @sizes[@idx - 1] = @sizes[@idx - 1] + percentage_delta
     @sizes[@idx] = @sizes[@idx] - percentage_delta
-    console.log(diff, percentage_delta, @sizes)
     @set_sizes()
 
-  mouseup : (basepoint, lastcoords, coords) =>
-    console.log('up', basepoint, lastcoords, coords)
+
+class HBoxView extends SlideableLayout
+  dim : 'width'
+  mouse_coord : 'pageX'
+  component_selector : '.hcomponent'
+  content_selector : '.hcontent'
+  template : hboxtemplate
+  attributes :
+    class : 'hbox'
+
+  events :
+    "mousedown .hseparator" :  'handle_click'
+
+
+class VBoxView extends SlideableLayout
+  dim : 'height'
+  mouse_coord : 'pageY'
+  component_selector : '.vcomponent'
+  content_selector : '.vcontent'
+  template : vboxtemplate
+  attributes :
+    class : 'vbox'
+
+  events :
+    "mousedown .vseparator" :  'handle_click'
+
 
 exports.HBoxView = HBoxView
+exports.VBoxView = VBoxView
