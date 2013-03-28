@@ -17,7 +17,9 @@ test('hbox', () ->
     height : 100
     width : 300
   )
+  $('body').append('<p>horizontal layout</p>')
   $('body').append(view.el)
+
 )
 
 
@@ -36,6 +38,7 @@ test('vbox', () ->
     height : 300
     width : 100
   )
+  $('body').append('<p>vertical</p>')
   $('body').append(view.el)
 )
 
@@ -62,5 +65,6 @@ test('test_nested', () ->
     width : 300
     height : 300
   )
+  $('body').append('<p>combined</p>')
   $('body').append(view.el)
 )
