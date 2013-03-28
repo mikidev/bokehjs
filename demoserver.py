@@ -111,7 +111,7 @@ alltests = {
         "hasparent_test",
         "hasproperty_test"
     ],
-
+    'layout' : ['layout_test'],
     'tick' : ['unittest/tick_test'],
 
     'perf' : ['unittest/perf_test'],

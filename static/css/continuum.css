@@ -11,3 +11,44 @@
     background-color : #C0C0C0;    
 }
 
+.hbox{
+    padding : 0px; 
+    margin : 0px;
+}
+.hcomponent{
+    height : 100%;
+    border : 0px;
+    padding : 0px; 
+    margin : 0px;
+    position : relative;
+    float : left;
+}
+.first-hcontent{
+    padding-left : 0px;
+}
+.not-first-hcontent{
+    padding-left : 5px;    
+}
+.hcontent{
+    height : 100%;
+    width : 100%;
+}
+
+.hcontent{
+    height : 100%;
+    width : 100%;
+    padding-left : 5px;
+}
+.hseparator{
+    width : 5px;
+    height : 100%;
+    background-color : #ddd;
+    border : 1px solid #bbb;
+    border-width : 0px;
+    position : absolute;
+    cursor : w-resize;
+}
+
+.activated{
+    background-color : #00d;
+}
